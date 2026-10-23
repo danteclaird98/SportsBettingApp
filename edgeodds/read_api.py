@@ -8,6 +8,7 @@ import sqlite3
 from urllib.parse import parse_qs, urlsplit
 
 from .ingestion import IngestionStore
+from .integrations.edgeboard import edgeboard_contract
 from .sportradar import FeedError
 
 
@@ -73,7 +74,9 @@ def build_handler(store: IngestionStore, token: str, *, credential_configured=Fa
                         cursor = int(args['before_id']) if 'before_id' in args else None
                         result = store.history(event_id, mode=mode, limit=limit, before_id=cursor)
                     elif parts.path == '/v1/edgeboard':
-                        result = store.edgeboard(event_id, mode=mode, limit=limit)
+                        result = edgeboard_contract(
+                            store.edgeboard(event_id, mode=mode, limit=limit)
+                        )
                     else:
                         result = store.current(event_id, mode=mode, limit=limit)
                 else:

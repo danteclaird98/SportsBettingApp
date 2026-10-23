@@ -446,7 +446,11 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.request('/v1/odds?event_id=fixture:nfl:one')[1]['data_status'], 'DATA_UNAVAILABLE')
     def test_edgeboard_read_view(self):
         body = self.request('/v1/edgeboard?event_id=fixture:nfl:one&mode=fixture')[1]
-        self.assertTrue(all(not q['importable'] for q in body['quotes']))
+        self.assertEqual(body['schema'], 'edgeodds.edgeboard.v1')
+        self.assertTrue(body['read_only'])
+        self.assertEqual(body['execution'], 'DISABLED')
+        self.assertTrue(all(not q['analysis']['eligible'] for q in body['quotes']))
+        self.assertTrue(all(q['timestamps']['quote_updated_at'] is None for q in body['quotes']))
         self.assertNotIn(TOKEN, json.dumps(body))
     def test_no_writes_or_execution(self):
         self.assertEqual(self.request('/v1/orders', method='POST')[0], 405)
