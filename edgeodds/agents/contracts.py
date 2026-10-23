@@ -10,7 +10,12 @@ from typing import Iterable
 
 WORKERS = {
     "source-scout": ("docs/providers/**", "edgeodds/providers/**"),
-    "provider-builder": ("edgeodds/providers/**", "edgeodds/adapters.py"),
+    "provider-builder": (
+        "edgeodds/providers/**",
+        "edgeodds/adapters.py",
+        "edgeodds/sportradar.py",
+        "edgeodds/tests/test_ingestion.py",
+    ),
     "identity-guardian": ("edgeodds/identity.py", "edgeodds/tests/test_identity.py", "docs/identity/**"),
     "market-rules": ("edgeodds/settlement_rules.py", "edgeodds/rules/**", "docs/rules/**"),
     "price-intelligence": ("edgeodds/price_intelligence.py", "edgeodds/tests/test_price_intelligence.py", "docs/pricing/**"),
@@ -89,7 +94,8 @@ class AgentReport:
         patterns = WORKERS[self.agent]
         return tuple(
             path for path in self.changed_paths
-            if not any(fnmatch(path, pattern) for pattern in patterns)
+            if not path.startswith("edgeodds/agents/reports/")
+            and not any(fnmatch(path, pattern) for pattern in patterns)
         )
 
 

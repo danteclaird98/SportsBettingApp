@@ -71,6 +71,31 @@ class ParallelAgentContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "evidence is required"):
             report.validate()
 
+    def test_provider_builder_owns_existing_sportradar_adapter_and_tests(self):
+        report = AgentReport(
+            agent="provider-builder",
+            task_id="provider-scope",
+            base_sha=BASE,
+            head_sha=HEAD,
+            changed_paths=("edgeodds/sportradar.py", "edgeodds/tests/test_ingestion.py"),
+        )
+        report.validate()
+        self.assertEqual(report.ownership_violations(), ())
+
+    def test_evidence_report_path_is_not_an_ownership_violation(self):
+        report = AgentReport(
+            agent="source-scout",
+            task_id="report-path",
+            base_sha=BASE,
+            head_sha=HEAD,
+            changed_paths=(
+                "docs/providers/matrix.md",
+                "edgeodds/agents/reports/source-scout.json",
+            ),
+        )
+        report.validate()
+        self.assertEqual(report.ownership_violations(), ())
+
     def test_contract_touch_detection(self):
         self.assertEqual(
             protected_contracts_touched(["edgeodds/store.py", "docs/x.md"]),
