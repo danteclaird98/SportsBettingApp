@@ -73,6 +73,70 @@ class IdentityTests(unittest.TestCase):
                 ProviderEvent("fixture", "native-2", "NFL", "SEA", "ARI", T0)
             )
 
+    def test_provider_venue_evidence_must_match(self):
+        resolver = EventResolver(
+            self.registry(),
+            [
+                CanonicalEventRef("game-a", "NFL", "nfl:ari", "nfl:sea", T0, venue_id="stadium-a"),
+                CanonicalEventRef("game-b", "NFL", "nfl:ari", "nfl:sea", T0, venue_id="stadium-b"),
+            ],
+        )
+        match = resolver.resolve(
+            ProviderEvent(
+                "fixture", "native-venue", "NFL", "ARI", "SEA", T0,
+                venue_id="stadium-b",
+            )
+        )
+        self.assertEqual(match.event.event_id, "game-b")
+
+    def test_neutral_site_evidence_must_match_when_supplied(self):
+        resolver = EventResolver(
+            self.registry(),
+            [
+                CanonicalEventRef(
+                    "neutral", "NFL", "nfl:ari", "nfl:sea", T0,
+                    venue_id="stadium-n", neutral_site=True,
+                ),
+                CanonicalEventRef(
+                    "home", "NFL", "nfl:ari", "nfl:sea", T0,
+                    venue_id="stadium-h", neutral_site=False,
+                ),
+            ],
+        )
+        match = resolver.resolve(
+            ProviderEvent(
+                "fixture", "native-neutral", "NFL", "ARI", "SEA", T0,
+                neutral_site=True,
+            )
+        )
+        self.assertEqual(match.event.event_id, "neutral")
+
+    def test_missing_venue_evidence_does_not_guess_between_candidates(self):
+        resolver = EventResolver(
+            self.registry(),
+            [
+                CanonicalEventRef("game-a", "NFL", "nfl:ari", "nfl:sea", T0, venue_id="stadium-a"),
+                CanonicalEventRef("game-b", "NFL", "nfl:ari", "nfl:sea", T0, venue_id="stadium-b"),
+            ],
+        )
+        with self.assertRaises(AmbiguousIdentity):
+            resolver.resolve(
+                ProviderEvent("fixture", "native-ambiguous", "NFL", "ARI", "SEA", T0)
+            )
+
+    def test_material_reschedule_requires_reconciliation(self):
+        resolver = EventResolver(
+            self.registry(),
+            [CanonicalEventRef("game-1", "NFL", "nfl:ari", "nfl:sea", T0)],
+        )
+        with self.assertRaises(UnresolvedIdentity):
+            resolver.resolve(
+                ProviderEvent(
+                    "fixture", "native-rescheduled", "NFL", "ARI", "SEA",
+                    T0 + timedelta(hours=3),
+                )
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

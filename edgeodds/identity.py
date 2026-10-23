@@ -104,10 +104,19 @@ class ProviderEvent:
     away_alias: str
     home_alias: str
     starts_at: datetime
+    venue_id: str | None = None
+    neutral_site: bool | None = None
 
     def __post_init__(self) -> None:
+        for name in ("provider", "source_event_id", "league", "away_alias", "home_alias"):
+            if not str(getattr(self, name)).strip():
+                raise ValueError(f"{name} is required")
         if self.starts_at.tzinfo is None or self.starts_at.utcoffset() is None:
             raise ValueError("starts_at must be timezone-aware")
+        if self.venue_id is not None and not self.venue_id.strip():
+            raise ValueError("venue_id cannot be blank")
+        if self.neutral_site is not None and type(self.neutral_site) is not bool:
+            raise ValueError("neutral_site must be boolean or None")
 
 
 @dataclass(frozen=True)
@@ -117,10 +126,19 @@ class CanonicalEventRef:
     away_id: str
     home_id: str
     starts_at: datetime
+    venue_id: str | None = None
+    neutral_site: bool | None = None
 
     def __post_init__(self) -> None:
+        for name in ("event_id", "league", "away_id", "home_id"):
+            if not str(getattr(self, name)).strip():
+                raise ValueError(f"{name} is required")
         if self.starts_at.tzinfo is None or self.starts_at.utcoffset() is None:
             raise ValueError("starts_at must be timezone-aware")
+        if self.venue_id is not None and not self.venue_id.strip():
+            raise ValueError("venue_id cannot be blank")
+        if self.neutral_site is not None and type(self.neutral_site) is not bool:
+            raise ValueError("neutral_site must be boolean or None")
 
 
 @dataclass(frozen=True)
@@ -149,6 +167,10 @@ class EventResolver:
             if event.league.casefold() != source.league.casefold():
                 continue
             if event.away_id != away.canonical_id or event.home_id != home.canonical_id:
+                continue
+            if source.venue_id is not None and event.venue_id != source.venue_id:
+                continue
+            if source.neutral_site is not None and event.neutral_site != source.neutral_site:
                 continue
             delta = abs((event.starts_at - source.starts_at).total_seconds())
             if delta <= tolerance.total_seconds():
