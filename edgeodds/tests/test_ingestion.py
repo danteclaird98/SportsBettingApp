@@ -19,7 +19,7 @@ from edgeodds.__main__ import main
 from edgeodds.ingestion import IngestionStore
 from edgeodds.read_api import build_handler
 from edgeodds.sportradar import (
-    EventBinding, FeedError, MAX_BODY, SportradarClient, decode, digest, normalize,
+    EventBinding, FeedError, MAX_BODY, SportradarClient, decode, digest, normalize, response_metadata,
 )
 
 NOW = datetime(2030, 1, 2, 18, tzinfo=timezone.utc)
@@ -356,6 +356,61 @@ class TransportTests(unittest.TestCase):
         opener = FakeOpener(FakeResponse(b'{}'))
         wire = SportradarClient(TOKEN, opener=opener, clock=lambda: NOW).schedule('2030-01-02', start=50)
         self.assertIn('start=50&limit=50', wire.endpoint)
+
+    def test_pagination_metadata_detects_next_page(self):
+        opener = FakeOpener(FakeResponse(
+            b'{}',
+            {
+                'X-Max-Results': '120',
+                'X-Offset': '0',
+                'X-Result': '50',
+                'X-Origin-Id': 'MARKET_ORIGIN_MAGIC_CRAWLERS',
+                'Cache-Control': 'public, max-age=60',
+            },
+        ))
+        wire = SportradarClient(TOKEN, opener=opener, clock=lambda: NOW).schedule('2030-01-02')
+        meta = wire.metadata(requested_start=0, requested_limit=50)
+        self.assertEqual(meta.origin_tier, 'oc_us')
+        self.assertEqual(meta.cache_ttl_seconds, 60)
+        self.assertFalse(meta.pagination.complete)
+        self.assertEqual(meta.pagination.next_start, 50)
+
+    def test_pagination_metadata_detects_complete_page(self):
+        meta = response_metadata(
+            {'x-max-results': '35', 'x-offset': '0', 'x-result': '35'},
+            requested_start=0,
+            requested_limit=50,
+        )
+        self.assertTrue(meta.pagination.complete)
+        self.assertIsNone(meta.pagination.next_start)
+
+    def test_partial_pagination_headers_fail_closed(self):
+        with self.assertRaisesRegex(FeedError, 'INCOMPLETE_PAGINATION_HEADERS'):
+            response_metadata({'x-max-results': '100', 'x-result': '50'})
+
+    def test_pagination_offset_mismatch_fails_closed(self):
+        with self.assertRaisesRegex(FeedError, 'PAGINATION_OFFSET_MISMATCH'):
+            response_metadata(
+                {'x-max-results': '100', 'x-offset': '50', 'x-result': '50'},
+                requested_start=0,
+                requested_limit=50,
+            )
+
+    def test_stalled_pagination_fails_closed(self):
+        with self.assertRaisesRegex(FeedError, 'PAGINATION_STALLED'):
+            response_metadata(
+                {'x-max-results': '100', 'x-offset': '0', 'x-result': '0'},
+                requested_start=0,
+                requested_limit=50,
+            )
+
+    def test_origin_tier_is_observed_not_assumed(self):
+        self.assertEqual(
+            response_metadata({'x-origin-id': 'MARKET_ORIGIN_CORE_CRAWLERS'}).origin_tier,
+            'oc_core',
+        )
+        self.assertEqual(response_metadata({}).origin_tier, 'unknown')
+        self.assertEqual(response_metadata({'x-origin-id': 'future-tier'}).origin_tier, 'unrecognized')
 
 
 class HttpTests(unittest.TestCase):
