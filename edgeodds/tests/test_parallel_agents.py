@@ -43,7 +43,7 @@ class ParallelAgentContractTests(unittest.TestCase):
             base_sha=BASE,
             head_sha=HEAD,
             changed_paths=("edgeodds/models.py",),
-            changed_contracts=("normalized-quote",),
+            changed_contracts=("normalized-quote", "verification-state"),
         )
         report.validate()
         self.assertEqual(report.ownership_violations(), ("edgeodds/models.py",))
