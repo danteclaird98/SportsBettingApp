@@ -1,0 +1,11 @@
+# Security boundary
+
+This release is for a local, trusted machine. Bearer tokens isolate API users, but do not provide public account enrollment, recovery, expiring sessions or identity-provider integration. Restart with changed `BETTING_USERS` to revoke a token. Provider keys stay in server environment; they are not returned by the API. Errors omit raw provider URLs/bodies and database paths. API credentials are never written to audit rows by application code.
+
+The server binds only to 127.0.0.1, validates Host/Origin, rejects foreign origins, enables no CORS, and requires authentication for API and odds routes. Public routes are only the three local UI assets. Requests have a 1 MB JSON limit, 15-second socket timeout, 32-handler ceiling and 240-request/minute per-client-IP limit. Slow connections beyond the concurrency ceiling are closed. These are local engineering limits, not load-test guarantees. CSP, no-store, nosniff and no-referrer headers accompany responses. UI rendering uses DOM textContent, never imported HTML.
+
+Manual API quote imports are forced to manual_unverified with rules_verified=false; manual state imports remain manual. Successful provider retrieval still does not establish rule equivalence, account availability or independently modeled value. Local Python APIs are trusted application boundaries, not network authorization endpoints.
+
+Application Python dependencies: standard library only. Validated runtime: Python 3.12.14 and SQLite supplied by that runtime. Development browser workflow: Playwright 1.62.1 and its Chromium. No external CVE database scan, dependency-audit service or penetration test was completed in this session. Keep the runtime patched and review development-tool advisories before public deployment; do not interpret zero third-party Python packages as a vulnerability clearance.
+
+Public deployment remains blocked until the real hosting target is integrated and verified with TLS, managed secrets, expiring authentication, account authorization, shared rate limits, production request handling, monitored logging and backup/restore tests. The loopback policy intentionally prevents treating this server as an already completed public deployment.

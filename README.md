@@ -1,3 +1,9 @@
+## Pre-launch repair candidate
+
+The complete runnable local app is now in [`research_desk/`](research_desk/README.md). Run `cd research_desk` then `python3 launch.py` and open http://127.0.0.1:8765. The launcher prints a fresh local access token. No installation is required beyond Python with SQLite/timezone support.
+
+The original uploaded candidate folders and analytical `edgeboard/` package are preserved. `edgeodds/` has independent storage/identity repairs; the running dashboard uses the user-isolated Research Desk store rather than silently sharing the foundation's global snapshot database. See [`docs/prelaunch/IMPLEMENTATION_MATRIX.md`](docs/prelaunch/IMPLEMENTATION_MATRIX.md) for exactly what is complete, tested, blocked and not deployed.
+
 # Sports betting research improvement candidate
 
 Status: standalone candidate, not integrated or deployed. No existing agent source, trained model, prediction ledger, or historical odds dataset was located. No model was changed. No held-out improvement claim is justified. Tests use synthetic fixtures solely to validate arithmetic and controls.

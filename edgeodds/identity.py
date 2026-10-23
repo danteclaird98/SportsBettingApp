@@ -61,6 +61,7 @@ class AliasRecord:
 
     def active_at(self, at: datetime | None) -> bool:
         if at is None:
+            if self.valid_from or self.valid_to: raise ValueError("Dated aliases require an as-of time")
             return True
         if at.tzinfo is None or at.utcoffset() is None:
             raise ValueError("at must be timezone-aware")
@@ -104,8 +105,10 @@ class ProviderEvent:
     away_alias: str
     home_alias: str
     starts_at: datetime
+    neutral_site: bool = False
 
     def __post_init__(self) -> None:
+        if type(self.neutral_site) is not bool: raise ValueError("neutral_site must be boolean")
         if self.starts_at.tzinfo is None or self.starts_at.utcoffset() is None:
             raise ValueError("starts_at must be timezone-aware")
 
@@ -117,8 +120,10 @@ class CanonicalEventRef:
     away_id: str
     home_id: str
     starts_at: datetime
+    neutral_site: bool = False
 
     def __post_init__(self) -> None:
+        if type(self.neutral_site) is not bool: raise ValueError("neutral_site must be boolean")
         if self.starts_at.tzinfo is None or self.starts_at.utcoffset() is None:
             raise ValueError("starts_at must be timezone-aware")
 
@@ -148,8 +153,9 @@ class EventResolver:
         for event in self._events:
             if event.league.casefold() != source.league.casefold():
                 continue
-            if event.away_id != away.canonical_id or event.home_id != home.canonical_id:
-                continue
+            oriented=event.away_id==away.canonical_id and event.home_id==home.canonical_id
+            neutral=source.neutral_site and event.neutral_site and {event.away_id,event.home_id}=={away.canonical_id,home.canonical_id}
+            if not (oriented or neutral): continue
             delta = abs((event.starts_at - source.starts_at).total_seconds())
             if delta <= tolerance.total_seconds():
                 candidates.append((event, delta))

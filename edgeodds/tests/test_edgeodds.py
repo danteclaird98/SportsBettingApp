@@ -106,7 +106,8 @@ class EdgeOddsContractTests(unittest.TestCase):
             )
             self.assertTrue(store.append(changed))
             rows = store.latest(event_id="nfl-2026-ari-sea")
-            self.assertEqual(len(rows), 3)
+            self.assertEqual(len(rows), 2)
+            self.assertEqual(len(store.history()),3)
             self.assertEqual(rows[0]["decimal_price"], 1.95)
 
 

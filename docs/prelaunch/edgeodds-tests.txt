@@ -1,0 +1,26 @@
+test_fresh_open_quote_is_eligible (test_edgeodds.EdgeOddsContractTests.test_fresh_open_quote_is_eligible) ... ok
+test_missing_provider_timestamp_is_not_fresh (test_edgeodds.EdgeOddsContractTests.test_missing_provider_timestamp_is_not_fresh) ... ok
+test_moneyline_rejects_line (test_edgeodds.EdgeOddsContractTests.test_moneyline_rejects_line) ... ok
+test_snapshot_store_is_append_only_and_dedupes_exact_repeat (test_edgeodds.EdgeOddsContractTests.test_snapshot_store_is_append_only_and_dedupes_exact_repeat) ... ok
+test_spread_requires_line (test_edgeodds.EdgeOddsContractTests.test_spread_requires_line) ... ok
+test_stale_quote_is_rejected (test_edgeodds.EdgeOddsContractTests.test_stale_quote_is_rejected) ... ok
+test_alias_requires_explicit_mapping (test_identity.IdentityTests.test_alias_requires_explicit_mapping) ... ok
+test_ambiguous_alias_is_not_auto_resolved (test_identity.IdentityTests.test_ambiguous_alias_is_not_auto_resolved) ... ok
+test_doubleheader_like_multiple_candidates_stays_ambiguous (test_identity.IdentityTests.test_doubleheader_like_multiple_candidates_stays_ambiguous) ... ok
+test_event_resolution_requires_exact_participants_and_time (test_identity.IdentityTests.test_event_resolution_requires_exact_participants_and_time) ... ok
+test_provider_scope_prevents_cross_provider_guess (test_identity.IdentityTests.test_provider_scope_prevents_cross_provider_guess) ... ok
+test_wrong_participants_do_not_match (test_identity.IdentityTests.test_wrong_participants_do_not_match) ... ok
+test_bad_price_and_limits (test_launch.LaunchTests.test_bad_price_and_limits) ... ok
+test_batch_rolls_back_after_invalid_row (test_launch.LaunchTests.test_batch_rolls_back_after_invalid_row) ... ok
+test_concurrent_replays_insert_once (test_launch.LaunchTests.test_concurrent_replays_insert_once) ... ok
+test_indexes_and_connections_close (test_launch.LaunchTests.test_indexes_and_connections_close) ... ok
+test_latest_uses_source_time_not_arrival (test_launch.LaunchTests.test_latest_uses_source_time_not_arrival) ... ok
+test_legacy_database_migrates_without_resetting_ids (test_launch.LaunchTests.test_legacy_database_migrates_without_resetting_ids) ... ok
+test_neutral_swapped_participants_require_explicit_flags (test_launch.LaunchTests.test_neutral_swapped_participants_require_explicit_flags) ... ok
+test_retry_retrieval_envelope_timezone_and_restart (test_launch.LaunchTests.test_retry_retrieval_envelope_timezone_and_restart) ... ok
+test_suspension_and_equal_time_conflicts_retained (test_launch.LaunchTests.test_suspension_and_equal_time_conflicts_retained) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.307s
+
+OK

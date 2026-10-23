@@ -1,0 +1,4 @@
+Pre-launch repair candidate — 2026-10-22 Pacific
+Recovered archive version 2 plus explicit local hardening.
+Repository base d564f027b9a9db8e64d67c5ba7e21ec583fbf65d.
+Live provider/browser/public-deployment gates remain open; see VERIFICATION.md.
