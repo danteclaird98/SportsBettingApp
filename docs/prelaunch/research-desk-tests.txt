@@ -1,0 +1,94 @@
+test_clv_changed_line_rejected (test_app.Evaluation.test_clv_changed_line_rejected) ... ok
+test_leakage_rejected (test_app.Evaluation.test_leakage_rejected) ... ok
+test_combination_requires_legs_and_has_no_inferred_probability (test_app.Workflow.test_combination_requires_legs_and_has_no_inferred_probability) ... ok
+test_currency_and_provisional_isolation (test_app.Workflow.test_currency_and_provisional_isolation) ... ok
+test_duplicate_external_import (test_app.Workflow.test_duplicate_external_import) ... ok
+test_http_workflow_auth_and_execution (test_app.Workflow.test_http_workflow_auth_and_execution) ... ok
+test_limits (test_app.Workflow.test_limits) ... ok
+test_nonfinite_and_missing_data (test_app.Workflow.test_nonfinite_and_missing_data) ... ok
+test_out_of_order_live_and_disconnect (test_app.Workflow.test_out_of_order_live_and_disconnect) ... ok
+test_quote_snapshot_and_fail_closed (test_app.Workflow.test_quote_snapshot_and_fail_closed) ... ok
+test_settlement_correction_reconciliation (test_app.Workflow.test_settlement_correction_reconciliation) ... ok
+test_coverage_is_not_operational_until_live_verified (test_core.CoverageTests.test_coverage_is_not_operational_until_live_verified) ... ok
+test_binary_ev_and_break_even (test_core.EVTests.test_binary_ev_and_break_even) ... ok
+test_coherent_uncertainty_bounds (test_core.EVTests.test_coherent_uncertainty_bounds) ... ok
+test_probability_must_be_exhaustive (test_core.EVTests.test_probability_must_be_exhaustive) ... ok
+test_push_void_and_dead_heat_settlements (test_core.EVTests.test_push_void_and_dead_heat_settlements) ... ok
+test_exact_market_identity_includes_line_segment_rules (test_core.MatchingAndFreshnessTests.test_exact_market_identity_includes_line_segment_rules) ... ok
+test_missing_live_latency_fails_closed_when_required (test_core.MatchingAndFreshnessTests.test_missing_live_latency_fails_closed_when_required) ... ok
+test_stale_suspended_and_unstamped_quotes_are_rejected (test_core.MatchingAndFreshnessTests.test_stale_suspended_and_unstamped_quotes_are_rejected) ... ok
+test_american_decimal_round_trip_and_implied_probability (test_core.OddsTests.test_american_decimal_round_trip_and_implied_probability) ... ok
+test_invalid_odds_rejected (test_core.OddsTests.test_invalid_odds_rejected) ... ok
+test_no_vig_requires_matched_complete_market (test_core.OddsTests.test_no_vig_requires_matched_complete_market) ... ok
+test_atomic_import_rolls_back_quotes_and_audit (test_expansion.Expansion.test_atomic_import_rolls_back_quotes_and_audit) ... ok
+test_cross_store_transaction_limits (test_expansion.Expansion.test_cross_store_transaction_limits) ... ok
+test_freshness_settings_isolated_and_applied (test_expansion.Expansion.test_freshness_settings_isolated_and_applied) ... ok
+test_live_state_reference_expires_on_update (test_expansion.Expansion.test_live_state_reference_expires_on_update) ... ok
+test_manual_live_state_and_period_mismatch_rejected (test_expansion.Expansion.test_manual_live_state_and_period_mismatch_rejected) ... ok
+test_market_metric_required (test_expansion.Expansion.test_market_metric_required) ... ok
+test_missing_line_and_participant_cannot_be_comparable (test_expansion.Expansion.test_missing_line_and_participant_cannot_be_comparable) ... ok
+test_props_different_metrics_never_compare (test_expansion.Expansion.test_props_different_metrics_never_compare) ... ok
+test_same_book_alias_external_import_duplicate (test_expansion.Expansion.test_same_book_alias_external_import_duplicate) ... ok
+test_same_book_multivendor_not_independent (test_expansion.Expansion.test_same_book_multivendor_not_independent) ... ok
+test_shared_parlay_leg_exposure (test_expansion.Expansion.test_shared_parlay_leg_exposure) ... ok
+test_simultaneous_settlements_do_not_create_false_drawdown (test_expansion.Expansion.test_simultaneous_settlements_do_not_create_false_drawdown) ... ok
+test_timezone_limit_and_validation (test_expansion.Expansion.test_timezone_limit_and_validation) ... ok
+test_unknown_time_invalidates_old_fresh_snapshot (test_expansion.Expansion.test_unknown_time_invalidates_old_fresh_snapshot) ... ok
+test_boolean_and_selection_strings_rejected (test_expansion.HistoricalTests.test_boolean_and_selection_strings_rejected) ... ok
+test_commission_negative_net_dead_heat (test_expansion.HistoricalTests.test_commission_negative_net_dead_heat) ... ok
+test_execution_prices_not_prediction_prices (test_expansion.HistoricalTests.test_execution_prices_not_prediction_prices) ... ok
+test_future_fitted_artifact_rejected (test_expansion.HistoricalTests.test_future_fitted_artifact_rejected) ... ok
+test_labels_unavailable_at_fit_cutoff_rejected (test_expansion.HistoricalTests.test_labels_unavailable_at_fit_cutoff_rejected) ... ok
+test_numeric_strings_normalized (test_expansion.HistoricalTests.test_numeric_strings_normalized) ... ok
+test_configuration_rejects_shared_short_or_empty_users (test_expansion.HttpSecurity.test_configuration_rejects_shared_short_or_empty_users) ... ok
+test_origin_host_json_and_provider_auth (test_expansion.HttpSecurity.test_origin_host_json_and_provider_auth) ... ok
+test_child_timestamp_and_unknown_availability (test_expansion.ProviderTests.test_child_timestamp_and_unknown_availability) ... ok
+test_complementary_alternate_lines_only (test_expansion.ProviderTests.test_complementary_alternate_lines_only) ... ok
+test_complete_three_way_benchmark (test_expansion.ProviderTests.test_complete_three_way_benchmark) ... ok
+test_explicit_three_way_missing_draw_not_normalized (test_expansion.ProviderTests.test_explicit_three_way_missing_draw_not_normalized) ... ok
+test_incomplete_and_futures_have_no_benchmark (test_expansion.ProviderTests.test_incomplete_and_futures_have_no_benchmark) ... ok
+test_props_retain_metrics_participants_and_lines (test_expansion.ProviderTests.test_props_retain_metrics_participants_and_lines) ... ok
+test_provider_response_identity_checked (test_expansion.ProviderTests.test_provider_response_identity_checked) ... ok
+test_rate_limit_redaction_cooldown_recovery (test_expansion.ProviderTests.test_rate_limit_redaction_cooldown_recovery) ... ok
+test_resumable_scan_reaches_all_sports_and_extra_markets (test_expansion.ProviderTests.test_resumable_scan_reaches_all_sports_and_extra_markets) ... ok
+test_schema_failure_atomic (test_expansion.ProviderTests.test_schema_failure_atomic) ... ok
+test_snapshot_duplicate_and_coverage_unverified (test_expansion.ProviderTests.test_snapshot_duplicate_and_coverage_unverified) ... ok
+test_tennis_set_and_period_total_contracts (test_expansion.ProviderTests.test_tennis_set_and_period_total_contracts) ... ok
+test_boolean_numeric_and_rules_rejected (test_hardening.Hardening.test_boolean_numeric_and_rules_rejected) ... ok
+test_boolean_revision_rejected (test_hardening.Hardening.test_boolean_revision_rejected) ... ok
+test_identical_time_provider_conflict_fails_closed (test_hardening.Hardening.test_identical_time_provider_conflict_fails_closed) ... ok
+test_limits_concurrent_entry_serialized (test_hardening.Hardening.test_limits_concurrent_entry_serialized) ... ok
+test_live_and_pregame_prices_never_compared (test_hardening.Hardening.test_live_and_pregame_prices_never_compared) ... ok
+test_provisional_exposure_still_consumes_limit (test_hardening.Hardening.test_provisional_exposure_still_consumes_limit) ... ok
+test_reimport_settled_wager_does_not_reset_settlement (test_hardening.Hardening.test_reimport_settled_wager_does_not_reset_settlement) ... ok
+test_suspended_latest_invalidates_old_open (test_hardening.Hardening.test_suspended_latest_invalidates_old_open) ... ok
+test_zero_after_rounding_rejected (test_hardening.Hardening.test_zero_after_rounding_rejected) ... ok
+test_best_price_uses_other_books_outside_page (test_launch.Launch.test_best_price_uses_other_books_outside_page) ... ok
+test_changed_price_same_observation_is_conflict (test_launch.Launch.test_changed_price_same_observation_is_conflict) ... ok
+test_cli_compatible_and_refuses_overwrite (test_launch.Launch.test_cli_compatible_and_refuses_overwrite) ... ok
+test_cross_provider_merge_requires_explicit_mapping (test_launch.Launch.test_cross_provider_merge_requires_explicit_mapping) ... ok
+test_explicit_postponement_and_reschedule_invalidate_old (test_launch.Launch.test_explicit_postponement_and_reschedule_invalidate_old) ... ok
+test_latest_and_history_have_bounded_pages_and_filters (test_launch.Launch.test_latest_and_history_have_bounded_pages_and_filters) ... ok
+test_live_missing_or_wrong_identity_never_comparable (test_launch.Launch.test_live_missing_or_wrong_identity_never_comparable) ... ok
+test_multiprocess_limits_are_atomic (test_launch.Launch.test_multiprocess_limits_are_atomic) ... ok
+test_multiprocess_snapshot_replay_is_atomic (test_launch.Launch.test_multiprocess_snapshot_replay_is_atomic) ... ok
+test_neutral_site_uses_source_id_not_home_away_title (test_launch.Launch.test_neutral_site_uses_source_id_not_home_away_title) ... ok
+test_price_format_errors_and_fractional_math (test_launch.Launch.test_price_format_errors_and_fractional_math) ... ok
+test_provider_retry_dedupes_new_retrieval (test_launch.Launch.test_provider_retry_dedupes_new_retrieval) ... ok
+test_provider_timeout_malformed_and_recovery (test_launch.Launch.test_provider_timeout_malformed_and_recovery) ... ok
+test_read_page_uses_consistent_snapshot (test_launch.Launch.test_read_page_uses_consistent_snapshot) ... ok
+test_same_teams_different_dates_cannot_reuse_mapping (test_launch.Launch.test_same_teams_different_dates_cannot_reuse_mapping) ... ok
+test_semantic_dedupe_changed_envelope_and_restart (test_launch.Launch.test_semantic_dedupe_changed_envelope_and_restart) ... ok
+test_sql_query_indexes (test_launch.Launch.test_sql_query_indexes) ... ok
+test_team_book_alias_is_explicit_and_scoped (test_launch.Launch.test_team_book_alias_is_explicit_and_scoped) ... ok
+test_database_failure_has_retryable_json_response (test_launch.LaunchHTTP.test_database_failure_has_retryable_json_response) ... WARNING:root:request_failed status=503
+ok
+test_latest_history_auth_and_query_injection (test_launch.LaunchHTTP.test_latest_history_auth_and_query_injection) ... WARNING:root:request_failed status=400
+WARNING:root:request_failed status=400
+ok
+test_manual_import_cannot_self_verify (test_launch.LaunchHTTP.test_manual_import_cannot_self_verify) ... ok
+
+----------------------------------------------------------------------
+Ran 86 tests in 209.939s
+
+OK

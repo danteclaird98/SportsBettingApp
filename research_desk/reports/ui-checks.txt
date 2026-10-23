@@ -1,0 +1,1 @@
+PASS entry fields, JSON round-trip, provisional checkbox, live-state mode, and sign-out clearing. Minimal DOM logic only; not browser verified.

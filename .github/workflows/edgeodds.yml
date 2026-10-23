@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - "edgeodds/**"
+      - "research_desk/**"
       - ".github/workflows/edgeodds.yml"
   pull_request:
     paths:
       - "edgeodds/**"
+      - "research_desk/**"
       - ".github/workflows/edgeodds.yml"
 
 jobs:
@@ -23,3 +25,30 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Run EdgeOdds regression tests
         run: python -m unittest discover -s edgeodds/tests -v
+
+      - name: Run Research Desk regression tests
+        working-directory: research_desk
+        run: python -B -m unittest discover -s tests -v
+      - name: Check frontend syntax and entry behavior
+        working-directory: research_desk
+        run: |
+          node --check web/ui.js
+          node tests/ui_logic.cjs
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install development browser tools
+        run: |
+          npm install --no-save playwright@1.62.1
+          npx playwright install --with-deps chromium
+      - name: Run isolated browser workflows
+        working-directory: research_desk
+        run: node tests/browser_workflows.cjs

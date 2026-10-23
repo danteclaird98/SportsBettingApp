@@ -1,0 +1,8 @@
+{
+  "application": "Python standard library only",
+  "validated_python": "3.12.14",
+  "development_browser_tools": {
+    "playwright": "1.62.1"
+  },
+  "external_vulnerability_scan": "not performed"
+}

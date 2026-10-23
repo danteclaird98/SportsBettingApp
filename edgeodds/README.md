@@ -49,3 +49,9 @@ python -m unittest discover -s edgeodds/tests -v
 4. Normalize moneyline/spread/total into this contract.
 5. Expose a read-only compatibility endpoint for EdgeBoard.
 6. Compare normalized output against the existing EdgeBoard / Sports Research Desk identity and freshness rules.
+
+## Pre-launch repairs
+
+Snapshot dedupe now uses source-observed economic content rather than retrieval time or an envelope hash. Batches commit atomically, connections close, and migrations backfill semantic keys/indexes while retaining old snapshot IDs and legacy duplicate history. `latest()` now returns current source-time snapshots per provider/book/contract, retaining simultaneous conflicts and market halts; use `history()` for the old recent-history behavior. Both support event/book filtering and bounded limit/offset, with a maximum of 500 rows per call.
+
+Explicit neutral-site flags permit swapped participant orientation only when both the provider event and canonical event declare a neutral site. Dated aliases require an as-of time. This foundation still has no live provider adapter registered or independent HTTP server. The runnable user-isolated dashboard/provider/API continuation is in `../research_desk/`; its store remains separate by design. See `../docs/prelaunch/IMPLEMENTATION_MATRIX.md` for release gates.

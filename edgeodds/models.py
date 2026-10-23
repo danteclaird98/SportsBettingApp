@@ -62,7 +62,7 @@ class CanonicalEvent:
 
     def __post_init__(self) -> None:
         for name in ("event_id", "sport", "league", "season", "away", "home"):
-            if not str(getattr(self, name)).strip():
+            if not isinstance(getattr(self, name),str) or not getattr(self, name).strip():
                 raise ValueError(f"{name} is required")
         if self.away.strip().casefold() == self.home.strip().casefold():
             raise ValueError("home and away participants must differ")
@@ -79,6 +79,7 @@ class MarketKey:
     settlement_rules_hash: str = "unknown"
 
     def __post_init__(self) -> None:
+        if not isinstance(self.market_type,MarketType): raise ValueError("market_type must be an enum")
         if not self.event_id.strip():
             raise ValueError("event_id is required")
         if not self.selection.strip():
@@ -90,7 +91,7 @@ class MarketKey:
         if self.market_type == MarketType.MONEYLINE and self.line is not None:
             raise ValueError("moneyline must not carry a line")
         if self.market_type in {MarketType.SPREAD, MarketType.TOTAL}:
-            if self.line is None or not isfinite(float(self.line)):
+            if self.line is None or isinstance(self.line,bool) or not isfinite(float(self.line)):
                 raise ValueError("spread/total requires a finite line")
 
 
@@ -115,10 +116,12 @@ class NormalizedQuote:
             "source_market_id",
             "source_payload_hash",
         ):
-            if not str(getattr(self, name)).strip():
+            if not isinstance(getattr(self, name),str) or not getattr(self, name).strip():
                 raise ValueError(f"{name} is required")
-        if not isfinite(float(self.decimal_price)) or float(self.decimal_price) <= 1.0:
+        if not isinstance(self.status,MarketStatus) or not isinstance(self.key,MarketKey): raise ValueError("Invalid quote status/key")
+        if isinstance(self.decimal_price,bool) or not isfinite(float(self.decimal_price)) or not 1.0 < float(self.decimal_price) <= 10000:
             raise ValueError("decimal_price must be finite and greater than 1")
+        object.__setattr__(self,"decimal_price",float(self.decimal_price))
         _require_tz(self.retrieved_at, "retrieved_at")
         if self.source_updated_at is not None:
             _require_tz(self.source_updated_at, "source_updated_at")
@@ -150,6 +153,8 @@ def evaluate_freshness(
     if quote.source_updated_at is None:
         return FreshnessResult(False, "provider source timestamp unavailable", None)
 
+    if not isfinite(float(future_tolerance_seconds)) or future_tolerance_seconds<0: return FreshnessResult(False,"invalid future tolerance",None)
+    if (quote.retrieved_at-now).total_seconds()>future_tolerance_seconds: return FreshnessResult(False,"retrieval timestamp is in the future",None)
     age = (now - quote.source_updated_at).total_seconds()
     if age < -future_tolerance_seconds:
         return FreshnessResult(False, "provider source timestamp is in the future", age)
