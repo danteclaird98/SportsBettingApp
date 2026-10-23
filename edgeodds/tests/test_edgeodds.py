@@ -86,6 +86,19 @@ class EdgeOddsContractTests(unittest.TestCase):
             store = SnapshotStore(Path(tmp) / "edgeodds.sqlite3")
             self.assertTrue(store.append(quote()))
             self.assertFalse(store.append(quote()))
+
+            moneyline = quote(
+                key=MarketKey(
+                    event_id="nfl-2026-ari-sea",
+                    market_type=MarketType.MONEYLINE,
+                    selection="Seattle Seahawks",
+                ),
+                source_market_id="native-moneyline-1",
+                source_payload_hash="sha256:moneyline",
+            )
+            self.assertTrue(store.append(moneyline))
+            self.assertFalse(store.append(moneyline))
+
             changed = quote(
                 decimal_price=1.95,
                 source_updated_at=NOW - timedelta(seconds=5),
@@ -93,7 +106,7 @@ class EdgeOddsContractTests(unittest.TestCase):
             )
             self.assertTrue(store.append(changed))
             rows = store.latest(event_id="nfl-2026-ari-sea")
-            self.assertEqual(len(rows), 2)
+            self.assertEqual(len(rows), 3)
             self.assertEqual(rows[0]["decimal_price"], 1.95)
 
 
