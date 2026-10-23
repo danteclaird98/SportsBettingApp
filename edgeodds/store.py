@@ -1,6 +1,8 @@
 """Append-only SQLite snapshot store for normalized EdgeOdds quotes."""
 from __future__ import annotations
 
+import hashlib
+import json
 import sqlite3
 from pathlib import Path
 from typing import Iterable
@@ -11,6 +13,7 @@ from .models import NormalizedQuote
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS odds_snapshots (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fingerprint TEXT NOT NULL UNIQUE,
     provider TEXT NOT NULL,
     bookmaker TEXT NOT NULL,
     source_event_id TEXT NOT NULL,
@@ -25,24 +28,36 @@ CREATE TABLE IF NOT EXISTS odds_snapshots (
     retrieved_at TEXT NOT NULL,
     source_updated_at TEXT,
     status TEXT NOT NULL,
-    source_payload_hash TEXT NOT NULL,
-    UNIQUE (
-        provider,
-        bookmaker,
-        source_market_id,
-        selection,
-        line,
-        source_updated_at,
-        decimal_price,
-        status,
-        source_payload_hash
-    )
+    source_payload_hash TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_odds_event_time
 ON odds_snapshots(event_id, retrieved_at DESC);
 CREATE INDEX IF NOT EXISTS idx_odds_provider_book_time
 ON odds_snapshots(provider, bookmaker, retrieved_at DESC);
 """
+
+
+def snapshot_fingerprint(quote: NormalizedQuote) -> str:
+    """Stable identity for an exact normalized snapshot, including NULL line values."""
+    payload = [
+        quote.provider,
+        quote.bookmaker,
+        quote.source_event_id,
+        quote.source_market_id,
+        quote.key.event_id,
+        quote.key.market_type.value,
+        quote.key.selection,
+        quote.key.line,
+        quote.key.period,
+        quote.key.settlement_rules_hash,
+        float(quote.decimal_price),
+        quote.retrieved_at.isoformat(),
+        quote.source_updated_at.isoformat() if quote.source_updated_at else None,
+        quote.status.value,
+        quote.source_payload_hash,
+    ]
+    encoded = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 class SnapshotStore:
@@ -59,6 +74,7 @@ class SnapshotStore:
     def append(self, quote: NormalizedQuote) -> bool:
         """Append a quote snapshot. Returns False only for an exact duplicate."""
         values = (
+            snapshot_fingerprint(quote),
             quote.provider,
             quote.bookmaker,
             quote.source_event_id,
@@ -79,11 +95,11 @@ class SnapshotStore:
             cur = db.execute(
                 """
                 INSERT OR IGNORE INTO odds_snapshots (
-                    provider, bookmaker, source_event_id, source_market_id,
+                    fingerprint, provider, bookmaker, source_event_id, source_market_id,
                     event_id, market_type, selection, line, period,
                     settlement_rules_hash, decimal_price, retrieved_at,
                     source_updated_at, status, source_payload_hash
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 values,
             )
