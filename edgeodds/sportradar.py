@@ -127,11 +127,109 @@ class EventBinding:
 
 
 @dataclass(frozen=True)
+class PaginationInfo:
+    total_available: int
+    offset: int
+    returned: int
+    next_start: int | None
+    complete: bool
+
+
+@dataclass(frozen=True)
+class ResponseMetadata:
+    origin_tier: str
+    cache_ttl_seconds: int | None
+    pagination: PaginationInfo | None
+
+
+@dataclass(frozen=True)
 class WireResponse:
     body: bytes = field(repr=False)
     retrieved_at: datetime
     endpoint: str
     headers: dict
+
+    def metadata(self, *, requested_start: int | None = None,
+                 requested_limit: int | None = None) -> ResponseMetadata:
+        return response_metadata(
+            self.headers,
+            requested_start=requested_start,
+            requested_limit=requested_limit,
+        )
+
+
+
+
+def _header_int(headers: dict, name: str) -> int | None:
+    value = headers.get(name)
+    if value is None:
+        return None
+    if not isinstance(value, str) or not re.fullmatch(r"\d+", value.strip()):
+        raise FeedError('INVALID_PAGINATION_HEADERS')
+    result = int(value)
+    if result > 10_000_000:
+        raise FeedError('INVALID_PAGINATION_HEADERS')
+    return result
+
+
+def _cache_ttl(headers: dict) -> int | None:
+    value = headers.get('cache-control')
+    if not isinstance(value, str):
+        return None
+    match = re.search(r"(?:^|,)\s*max-age=(\d+)(?:\s*,|$)", value, flags=re.IGNORECASE)
+    if not match:
+        return None
+    ttl = int(match.group(1))
+    return ttl if ttl <= 86400 else None
+
+
+def response_metadata(headers: dict, *, requested_start: int | None = None,
+                      requested_limit: int | None = None) -> ResponseMetadata:
+    if not isinstance(headers, dict):
+        raise FeedError('INVALID_RESPONSE_HEADERS')
+
+    origin = headers.get('x-origin-id')
+    tiers = {
+        'MARKET_ORIGIN_MAGIC_CRAWLERS': 'oc_us',
+        'MARKET_ORIGIN_CORE_CRAWLERS': 'oc_core',
+    }
+    origin_tier = tiers.get(origin, 'unknown' if origin is None else 'unrecognized')
+
+    total = _header_int(headers, 'x-max-results')
+    offset = _header_int(headers, 'x-offset')
+    returned = _header_int(headers, 'x-result')
+    present = [total is not None, offset is not None, returned is not None]
+    pagination = None
+    if any(present):
+        if not all(present):
+            raise FeedError('INCOMPLETE_PAGINATION_HEADERS')
+        if offset > total or returned > total or offset + returned > total:
+            raise FeedError('INVALID_PAGINATION_HEADERS')
+        if requested_start is not None:
+            if type(requested_start) is not int or requested_start < 0:
+                raise FeedError('INVALID_PAGE')
+            if offset != requested_start:
+                raise FeedError('PAGINATION_OFFSET_MISMATCH')
+        if requested_limit is not None:
+            if type(requested_limit) is not int or requested_limit <= 0:
+                raise FeedError('INVALID_PAGE')
+            if returned > requested_limit:
+                raise FeedError('INVALID_PAGINATION_HEADERS')
+        complete = offset + returned >= total
+        if returned == 0 and not complete:
+            raise FeedError('PAGINATION_STALLED')
+        pagination = PaginationInfo(
+            total_available=total,
+            offset=offset,
+            returned=returned,
+            next_start=None if complete else offset + returned,
+            complete=complete,
+        )
+    return ResponseMetadata(
+        origin_tier=origin_tier,
+        cache_ttl_seconds=_cache_ttl(headers),
+        pagination=pagination,
+    )
 
 
 class NoRedirect(HTTPRedirectHandler):
