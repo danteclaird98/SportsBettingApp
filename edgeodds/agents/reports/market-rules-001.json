@@ -2,12 +2,11 @@
   "agent": "market-rules",
   "task_id": "market-rules-001",
   "base_sha": "f5eaa23fa9db3afa1fe201ab04c9d0cd7b49f7f3",
-  "head_sha": "PENDING_COMMIT_SHA",
+  "head_sha": "254c2e560393606f4e5dfd69a0733c61dfb33f1a",
   "changed_paths": [
     "edgeodds/settlement_rules.py",
     "edgeodds/tests/test_settlement_rules.py",
-    "docs/rules/README.md",
-    "edgeodds/agents/reports/market-rules-001.json"
+    "docs/rules/README.md"
   ],
   "changed_contracts": [],
   "tests_run": [
