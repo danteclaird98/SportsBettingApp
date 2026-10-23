@@ -38,6 +38,12 @@ class SettlementRulesTests(unittest.TestCase):
     def test_unverified_rules_are_not_execution_equivalent(self):
         self.assertFalse(rule(verified=False).execution_equivalent(rule()))
 
+    def test_different_record_ids_with_same_semantics_are_equivalent(self):
+        left = rule(rule_id="book-a:nfl:spread", version="2026-a", source_ref="https://a.invalid")
+        right = rule(rule_id="book-b:nfl:spread", version="2026-b", source_ref="https://b.invalid")
+        self.assertEqual(left.fingerprint, right.fingerprint)
+        self.assertTrue(left.execution_equivalent(right))
+
     def test_rule_mismatch_is_not_equivalent(self):
         self.assertFalse(
             rule(overtime=OvertimeTreatment.INCLUDED).execution_equivalent(
