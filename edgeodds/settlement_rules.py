@@ -53,8 +53,6 @@ class SettlementRule:
     @property
     def fingerprint(self) -> str:
         payload = {
-            "rule_id": self.rule_id,
-            "version": self.version,
             "market_type": self.market_type.value,
             "period": self.period,
             "overtime": self.overtime.value,
