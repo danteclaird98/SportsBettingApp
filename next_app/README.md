@@ -14,7 +14,7 @@ cd /workspace/SportsBettingApp
 python next_app/server.py --port 8080
 ```
 
-Open http://127.0.0.1:8080. Use **Open full research suite** for the migrated original tools at `/advanced/`. The Python launcher starts the bundled Node backend on loopback port 8091. Set provider keys before launching when licensed access is available. The server deliberately binds to loopback. It is a **single-user local app**, without multi-user authentication or internet deployment infrastructure. SQLite databases are created in `next_app/data/`, ignored by Git, and persist across restarts. The initial $1,000 bankroll is a configurable starting setting, not an imported account balance.
+Open http://127.0.0.1:8080. Use **Open full research suite** for the migrated original tools at `/advanced/`. The Python launcher starts the bundled Node backend on loopback port 8091. Set provider keys before launching when licensed access is available. The server binds to loopback by default. It is a **single-owner app**, with optional workspace-wide password protection, without multi-user accounts or provisioned internet deployment infrastructure. See HOSTING.md before changing the bind address. SQLite databases are created in `next_app/data/`, ignored by Git, and persist across restarts. The initial $1,000 bankroll is a configurable starting setting, not an imported account balance.
 
 ## Implemented
 
@@ -27,6 +27,10 @@ Open http://127.0.0.1:8080. Use **Open full research suite** for the migrated or
 - A live/second-half workspace that identifies missing live evidence and links to the recovered research models.
 
 ## Connecting captured odds
+
+For private hosting preparation and the optional workspace-wide password gate,
+see [HOSTING.md](HOSTING.md). Public hosting and live provider verification still
+require host configuration and authorized provider credentials.
 
 Use an existing EdgeOdds ingestion database:
 
