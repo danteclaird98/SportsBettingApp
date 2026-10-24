@@ -35,7 +35,8 @@ The **Receiving 60+ lab** in the main workspace offers the same scorer through
 browser login, a labeled synthetic example, readable abstention messages and
 downloadable request/response receipts. Editing inputs invalidates the old
 receipt. Prior games can be entered through ordinary form fields or optional
-JSON import. Form drafts stay in the tab until reload. **Save research receipt**
+JSON import. The input label is explicitly client-declared; edited examples
+retain a sample-origin reminder. Form drafts stay in the tab until reload. **Save research receipt**
 recalculates on the server and saves an append-only request/score record in
 the workspace SQLite database, separate from wagers. Current player history
 must still be supplied and remains unverified.
@@ -89,4 +90,4 @@ The browser check runs a temporary server with disposable databases, checks desk
 
 Validated locally: 7 new backend test groups, 140 existing EdgeOdds tests, JavaScript syntax, and Chromium flows covering demo filtering, slip review, de-vig arithmetic, persistent paper wager settlement, model reports, provenance, export, mobile overflow and browser errors. Synthetic tests establish software behavior, not betting performance.
 
-Additional migrated-runtime checks: `npm run build`, `npm run test:model` (10 pass, 1 real-data cohort check skipped without pinned raw CSVs), `node --experimental-test-isolation=none --test compat/runtime.test.mjs` (CRUD, owner separation, transactions and rollback), and 2 Python receiving-model tests. Browser checks opened the migrated Advanced Research and My Wagers views without JavaScript exceptions. The protected storage diagnostic returned 401 signed out and completed create/read/update/delete signed in. The current workspace suite has 22 tests covering access, readiness, receipts, accounting and backup/restore. GitHub Actions runs the suites, browser workflows and Render image build.
+Additional migrated-runtime checks: `npm run build`, `npm run test:model` (13 pass, 1 real-data cohort check skipped without pinned raw CSVs), `node --experimental-test-isolation=none --test compat/runtime.test.mjs` (CRUD, owner separation, transactions and rollback), and 2 Python receiving-model tests. Browser checks opened the migrated Advanced Research and My Wagers views without JavaScript exceptions. The protected storage diagnostic returned 401 signed out and completed create/read/update/delete signed in. The current workspace suite has 22 tests covering access, readiness, receipts, accounting and backup/restore. GitHub Actions runs the suites, browser workflows and Render image build.

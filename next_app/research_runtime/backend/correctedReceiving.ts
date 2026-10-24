@@ -83,7 +83,8 @@ export function createCorrectedReceivingService(artifact: unknown, report: unkno
       if (!exact(h,['playerId','gameId','kickoffAt','resolvedAt','observedAt','receivingYards'])||h.playerId!==r.playerId||!id(h.gameId)||h.gameId===r.gameId||seen.has(h.gameId)) return abstain('INVALID_HISTORY_IDENTITY');
       seen.add(h.gameId);
       const played=time(h.kickoffAt),resolved=time(h.resolvedAt),observed=time(h.observedAt);
-      if (![played,resolved,observed].every(finite)||played>=resolved||resolved>observed||observed>=decision||!finite(h.receivingYards)||!Number.isInteger(h.receivingYards)) return abstain('HISTORY_NOT_AVAILABLE_AS_OF_DECISION');
+      if (![played,resolved,observed].every(finite)||played>=resolved||resolved>observed||observed>=decision) return abstain('HISTORY_NOT_AVAILABLE_AS_OF_DECISION');
+      if (!finite(h.receivingYards)||!Number.isSafeInteger(h.receivingYards)) return abstain('INVALID_HISTORY_YARDAGE');
       history.push({kickoff:played,yards:h.receivingYards});
     }
     history.sort((x,y)=>x.kickoff-y.kickoff);

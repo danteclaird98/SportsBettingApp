@@ -29,7 +29,11 @@ greater than or equal to 60, conditional on a recorded player row.
 | `comparison` | `>=` |
 
 Each history row must contain exactly `playerId`, `gameId`, `kickoffAt`,
-`resolvedAt`, `observedAt`, and integer `receivingYards`. Use UTC ISO timestamps
+`resolvedAt`, `observedAt`, and safe-integer `receivingYards` (between
+−9,007,199,254,740,991 and 9,007,199,254,740,991). This numeric range prevents
+precision loss between API runtimes; it is not a football plausibility rule.
+Fractional, nonfinite and unsafe yardage abstains with `INVALID_HISTORY_YARDAGE`.
+Use UTC ISO timestamps
 ending in `Z` (seconds, or exactly three decimal places). The same player must
 appear in every row. Games must be unique, exclude the target game, and satisfy
 `kickoffAt < resolvedAt <= observedAt < decisionAt`. Include at least three
@@ -37,6 +41,14 @@ prior games and no more than 500. Negative receiving yardage is retained.
 The scorer sorts history and derives last-3/last-8 averages, hit rates and the
 number of supplied prior games. Supply the complete relevant recorded history;
 omitting rows changes these features and is not detected automatically.
+
+The frozen pipeline constructed history from NFL regular-season WR/RB/TE
+recorded rows in its 2021–2025 source window, retaining history across seasons
+and beginning in 2021. API rows do not contain season type, historical position
+or source lineage, so this endpoint cannot verify that a supplied history
+matches that universe. A source adapter must document its historical inclusion
+window and prove availability/completeness before its results can support
+comparable forward validation.
 
 ## Synthetic request example
 
@@ -112,7 +124,8 @@ their source provenance if you plan forward validation.
 
 ## Optional saved research receipts
 
-The browser lab provides game-by-game history entry, optional JSON import and a
+The browser lab provides game-by-game history entry, an explicit client-declared
+input label, optional JSON import and a
 separate **Save research receipt** action. To save from an API client, send
 `POST /api/receiving60/receipts` with your API key and exactly:
 
@@ -128,6 +141,9 @@ Replace `input` with the complete valid request described above and use the
 64-character `canonicalArtifactSha256` returned by the scorer. For synthetic
 test inputs, set `inputMode` to `synthetic`. These input labels are client
 declarations, not independently verified provenance.
+Edited examples remain synthetic by default. The browser reminds you when a
+draft began as an example; only declare supplied input after replacing sample
+values. Changing the label clears the previous estimate and save association.
 
 The server recalculates the input before saving; it never accepts a score
 receipt from a client. An artifact mismatch returns `409`. Invalid history or

@@ -55,6 +55,15 @@ assert result['canonicalArtifactSha256']=='7852516f02ee5eaf6337feedaadaf41b930af
 call('/api/receiving60/predict',b'{',expected=400)
 assert call('/api/receiving60/predict',b'{}',expected=422)['probability'] is None
 call('/api/receiving60/predict',b'{}',headers={'Authorization':'Bearer wrong'},expected=401)
+before_invalid=len(call('/api/receiving60/receipts')['receipts'])
+for yards in (9007199254740993,-9007199254740993):
+    invalid=json.loads(json.dumps(payload)); invalid['history'][0]['receivingYards']=yards
+    rejected=call('/api/receiving60/predict',json.dumps(invalid).encode(),expected=422)
+    assert rejected['reason']=='INVALID_HISTORY_YARDAGE'
+    envelope={'inputMode':'supplied','input':invalid,'expectedArtifactSha256':result['canonicalArtifactSha256']}
+    rejected=call('/api/receiving60/receipts',json.dumps(envelope).encode(),expected=422)
+    assert rejected['reason']=='INVALID_HISTORY_YARDAGE'
+assert len(call('/api/receiving60/receipts')['receipts'])==before_invalid
 records=call('/api/receiving60/receipts')['receipts']
 if not records:
     envelope={'inputMode':'synthetic','input':payload,'expectedArtifactSha256':result['canonicalArtifactSha256']}

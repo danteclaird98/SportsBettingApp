@@ -85,6 +85,13 @@ with TemporaryDirectory() as tmp:
             assert saved['inputModeProvenance']=='CLIENT_DECLARED'
             page.get_by_role('button',name='Load synthetic example').click()
             page.locator('[name=prior-0-receivingYards]').fill('-10')
+            assert page.locator('[name=inputMode]').input_value()=='synthetic'
+            page.get_by_role('button',name='Calculate research estimate').click()
+            page.locator('.research-estimate').filter(has_text='%').wait_for()
+            page.locator('[name=inputMode]').select_option('supplied')
+            assert page.get_by_role('button',name='Download research receipt',exact=True).count()==0
+            assert 'This draft began as a synthetic example.' in page.locator('#receiving60-form').inner_text()
+            page.locator('[name=inputMode]').select_option('synthetic')
             page.get_by_role('button',name='Calculate research estimate').click()
             page.locator('.research-estimate').filter(has_text='%').wait_for()
             for _ in range(3):

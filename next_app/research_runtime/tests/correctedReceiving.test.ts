@@ -74,6 +74,33 @@ test('target contamination, duplicates, missing history and nonfinite outcomes a
   const infinite=input();infinite.history[0].receivingYards=Infinity;
   for(const value of [duplicate,target,infinite,{...input(),history:input().history.slice(0,2)}]) assert.equal((await service.score(value)).probability,null);
 });
+test('invalid yardage abstains distinctly from unavailable history clocks',async()=>{
+  for (const yards of [Infinity,-Infinity,NaN,1.5,-1.5,Number.MAX_SAFE_INTEGER+1,Number.MIN_SAFE_INTEGER-1]) {
+    const value=input(); value.history[0].receivingYards=yards;
+    const result=await service.score(value);
+    assert.equal(result.probability,null);
+    assert.equal(result.reason,'INVALID_HISTORY_YARDAGE');
+  }
+  const value=input(); value.history[0].observedAt=value.request.decisionAt;
+  assert.equal((await service.score(value)).reason,'HISTORY_NOT_AVAILABLE_AS_OF_DECISION');
+});
+test('JSON integers rounded beyond safe precision are rejected',async()=>{
+  for (const literal of ['9007199254740993','-9007199254740993']) {
+    const value=input(); value.history[0].receivingYards=JSON.parse(literal);
+    assert.notEqual(String(value.history[0].receivingYards),literal);
+    const result=await service.score(value);
+    assert.equal(result.probability,null);
+    assert.equal(result.reason,'INVALID_HISTORY_YARDAGE');
+  }
+});
+test('negative safe yardage remains in the derived averages',async()=>{
+  const value=input(); value.history[0].receivingYards=-50;
+  const result=await service.score(value);
+  assert.ok(result.probability!==null);
+  assert.ok('features' in result);
+  if (!('features' in result)) return;
+  assert.deepEqual(result.features,[30,30,2/3,2/3,3]);
+});
 test('tampered artifact and report fail closed and external mutations cannot change service',async()=>{
   const tamper=JSON.parse(JSON.stringify(artifact));tamper.intercept+=1;
   assert.equal((await createCorrectedReceivingService(tamper,report,manifest,now).score(input())).reason,'ARTIFACT_INTEGRITY_FAILURE');

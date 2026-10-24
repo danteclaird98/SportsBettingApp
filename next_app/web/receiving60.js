@@ -2,7 +2,7 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;',
 const localTime = date => Number.isFinite(date.getTime()) ? new Date(date.getTime() - date.getTimezoneOffset()*60000).toISOString().slice(0,16) : '';
 const utc = value => { const date=new Date(value); if (!value || !Number.isFinite(date.getTime())) throw Error('Enter valid kickoff and decision times'); return date.toISOString(); };
 const fresh = () => ({playerId:'',gameId:'',position:'WR',kickoffAt:localTime(new Date(Date.now()+7*86400000)),decisionAt:localTime(new Date()),history:'[]'});
-const state = {draft:fresh(),importText:'[]',inputMode:'supplied',busy:false,error:'',result:null,request:null,savedId:null,
+const state = {draft:fresh(),importText:'[]',inputMode:'supplied',sampleDerived:false,busy:false,error:'',result:null,request:null,savedId:null,
   readiness:null,readinessError:'',receipts:[],nextCursor:null,receiptsError:'',openRecord:null};
 let request, redraw;
 const reasons={
@@ -14,7 +14,8 @@ const reasons={
   FUTURE_DECISION_CLOCK:'The decision time cannot be in the future.',
   MODEL_NOT_AVAILABLE_AS_OF_DECISION:'The model was not available at this decision time.',
   INVALID_HISTORY_IDENTITY:'Check player IDs and game IDs. Prior games must be unique and exclude the target game.',
-  HISTORY_NOT_AVAILABLE_AS_OF_DECISION:'Every prior game must resolve and be observed before the decision time. Yardage must be an integer.',
+  INVALID_HISTORY_YARDAGE:'Use whole-number receiving yardage within the supported exact integer range.',
+  HISTORY_NOT_AVAILABLE_AS_OF_DECISION:'Every prior game must resolve and be observed before the decision time.',
   ARTIFACT_INTEGRITY_FAILURE:'The installed model failed its integrity check. No estimate is available.'
 };
 export function configureReceiving60(options) { request=options.request; redraw=options.redraw; }
@@ -42,6 +43,8 @@ export function receiving60View() {
     ${field('playerId','Player ID')}${field('gameId','Target game ID')}
     <label>Position<select name="position">${['WR','RB','TE'].map(p=>`<option ${p===d.position?'selected':''}>${p}</option>`).join('')}</select></label>
     <label>Target<input value="NFL · REG · full game · 60+ yards" readonly></label>
+    <label class="full">Input label<select name="inputMode"><option value="supplied" ${state.inputMode==='supplied'?'selected':''}>Supplied history / unverified</option><option value="synthetic" ${state.inputMode==='synthetic'?'selected':''}>Synthetic / includes sample data</option></select></label>
+    <p class="full subtle">This label is your declaration, not source verification. ${state.sampleDerived?'This draft began as a synthetic example. Keep it synthetic while any sample values remain; choose supplied only after replacing them with your own records.':'Use synthetic for invented or example values. Supplied history remains unverified.'}</p>
     ${field('kickoffAt','Scheduled kickoff (your local time)','datetime-local')}${field('decisionAt','Decision time (your local time)','datetime-local')}
   </div><div class="spacer"></div><h3>Prior games</h3><p id="history-help" class="subtle">Enter 3–500 prior games with unique game IDs. Use your local time for dates. Include the complete relevant recorded history; it is not fetched automatically. A game's final result must be observed before the decision time.</p>
   <div id="receiving60-games">${JSON.parse(d.history).map((row,i)=>`<section class="history-game"><div class="panelhead"><h3>Prior game ${i+1}</h3><button type="button" class="tiny" data-history-remove="${i}">Remove game ${i+1}</button></div><div class="formgrid panelbody">${[
@@ -70,6 +73,10 @@ export function receiving60View() {
 }
 export function receiving60Input(target) {
   if (target.form?.id!=='receiving60-form' || state.busy) return;
+  if (target.name==='inputMode') {
+    if (['synthetic','supplied'].includes(target.value)) { state.inputMode=target.value; invalidate(); redraw(); }
+    return;
+  }
   if (target.name==='history') { state.importText=target.value; return; }
   if (target.dataset.historyField) {
     const rows=JSON.parse(state.draft.history), key=target.dataset.historyField;
@@ -92,7 +99,7 @@ function downloadReceipt(receipt,filename) {
 }
 export async function receiving60Click(button) {
   if (state.busy) return;
-  if (button.id==='receiving60-clear') { state.draft=fresh(); state.importText='[]'; state.inputMode='supplied'; invalidate(); redraw(); }
+  if (button.id==='receiving60-clear') { state.draft=fresh(); state.importText='[]'; state.inputMode='supplied'; state.sampleDerived=false; invalidate(); redraw(); }
   if (button.id==='receiving60-add-game' || button.dataset.historyRemove!==undefined) {
     const rows=JSON.parse(state.draft.history);
     if (button.id==='receiving60-add-game' && rows.length<500) rows.push({playerId:state.draft.playerId,gameId:'',kickoffAt:'',resolvedAt:'',observedAt:'',receivingYards:null});
@@ -112,7 +119,7 @@ export async function receiving60Click(button) {
     state.draft={...fresh(),playerId:'synthetic-player',gameId:'synthetic-future',history:JSON.stringify([21,14,7].map((days,i)=>({
       playerId:'synthetic-player',gameId:`synthetic-past-${days}`,kickoffAt:stamp(new Date(now-days*86400000)),
       resolvedAt:stamp(new Date(now-days*86400000+3*3600000)),observedAt:stamp(new Date(now-days*86400000+4*3600000)),receivingYards:[-5,60,80][i]})),null,2)};
-    state.inputMode='synthetic'; state.importText=state.draft.history; invalidate(); redraw();
+    state.inputMode='synthetic'; state.sampleDerived=true; state.importText=state.draft.history; invalidate(); redraw();
   }
   if (button.id==='receiving60-download' && state.result && state.request) {
     const receipt={exportedAt:new Date().toISOString(),inputMode:state.inputMode,request:state.request,readiness:state.readiness,
