@@ -27,6 +27,19 @@ for attempt in range(50):
 else: raise AssertionError('Container startup did not become ready')
 assert call('/healthz',headers={})=={'status':'ok'}
 assert call('/api/system/readiness')['apiKeyConfigured'] is True
+from pathlib import Path
+application_processes=0
+for item in Path('/proc').iterdir():
+    if not item.name.isdigit(): continue
+    try:
+        command=(item/'cmdline').read_bytes().split(bytes([0]))
+        status=(item/'status').read_text()
+    except OSError: continue
+    if (b'next_app/server.py' in command and command[0].endswith(b'python')) or (b'runtime.mjs' in command and command[0].endswith(b'node')):
+        uid=next(line for line in status.splitlines() if line.startswith('Uid:')).split()[2]
+        assert uid=='10001','Application server must run without root privileges'
+        application_processes+=1
+assert application_processes==2
 for path in ('/','/advanced/','/api/export','/api/receiving60/receipts'):
     call(path,headers={},expected=401)
 with urlopen(Request(base+'/advanced/',headers=basic),timeout=3) as response:
@@ -115,20 +128,28 @@ else: raise AssertionError('Research process not found')
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--image',default='edgeboard-render:local')
+    parser.add_argument('--railway',action='store_true',help='Simulate a root-owned Railway mount and UID override')
     args=parser.parse_args()
     env=dict(os.environ,WORKSPACE_USER='owner',WORKSPACE_PASSWORD=secrets.token_urlsafe(32),WORKSPACE_API_KEY=secrets.token_urlsafe(32))
     for key in ('DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'): env.pop(key,None)
     prefix=['docker','--host=unix:///var/run/docker.sock']
     name='edgeboard-check-'+secrets.token_hex(4); volume=name+'-data'
-    def docker(*arguments,script=None):
+    def docker(*arguments,script=None,expected=0):
         result=subprocess.run(prefix+list(arguments),env=env,input=script,capture_output=True,text=True,timeout=60)
-        if result.returncode: raise RuntimeError(result.stdout+result.stderr)
+        if result.returncode!=expected: raise RuntimeError(result.stdout+result.stderr)
         return result.stdout.strip()
     def execute(script): print(docker('exec','-i',name,'python','-',script=script),flush=True)
     try:
         docker('volume','create',volume)
+        options=[]
+        if args.railway:
+            docker('run','--rm','-e','WORKSPACE_USER','-e','WORKSPACE_PASSWORD','-e','WORKSPACE_API_KEY',
+                '-e','RAILWAY_ENVIRONMENT_ID=smoke',args.image,expected=1)
+            docker('run','--rm','--user','0','--entrypoint','sh','-v',volume+':/var/data',args.image,
+                '-c','chown 0:0 /var/data && chmod 700 /var/data')
+            options=['--user','0','-e','RAILWAY_ENVIRONMENT_ID=smoke','-e','RAILWAY_VOLUME_MOUNT_PATH=/var/data']
         docker('run','-d','--name',name,'-v',volume+':/var/data','-e','WORKSPACE_USER',
-            '-e','WORKSPACE_PASSWORD','-e','WORKSPACE_API_KEY',args.image)
+            '-e','WORKSPACE_PASSWORD','-e','WORKSPACE_API_KEY',*options,args.image)
         execute(PROBE)
         docker('restart',name)
         execute(PROBE)

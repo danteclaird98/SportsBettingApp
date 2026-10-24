@@ -2,7 +2,7 @@
 
 ## Readiness and recovery
 
-Render uses `GET /healthz`. This is the only intentional unauthenticated
+Railway uses `GET /healthz`. This is the only intentional unauthenticated
 application route; it returns only `{"status":"ok"}` with 200, or
 `{"status":"unavailable"}` with 503. It checks workspace storage readability and
 the installed model's integrity through the Node research process. It does not
@@ -10,7 +10,7 @@ check external sports-data availability, disk free space or prediction validity.
 
 Authenticated clients can use `GET /api/system/readiness` for component booleans
 and whether browser/API credentials are configured. No credential values appear.
-The Render launcher requires the built research process, waits for readiness,
+The cloud launcher requires the built research process, waits for readiness,
 and exits if that process dies. SIGTERM stops the Python service and its child.
 
 ## Create and verify a backup
@@ -58,7 +58,7 @@ Do not restore by copying a database over an active process's open file.
 
 1. Confirm CI and the Docker build pass for the commit being deployed.
 2. Create and verify a backup; keep an independent copy.
-3. Deploy manually in Render (automatic redeploys remain disabled).
+3. Deploy manually in Railway after disabling automatic deployments in service settings.
 4. Confirm `/healthz`, browser login and an authenticated API request.
 5. Check one existing saved receipt and one synthetic calculation.
 6. Confirm saved data survives a service restart.

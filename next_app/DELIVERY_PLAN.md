@@ -4,14 +4,14 @@ This plan follows the current single-owner receiving60 research workflow. Your
 app has its own API key; no external odds provider is selected. A working app,
 trusted data and validated predictions are separate milestones.
 
-## 1. Reliable Render operation
+## 1. Reliable Railway operation
 
-- [x] Require the built research runtime and all app secrets in Render startup.
+- [x] Require the built research runtime and all app secrets in cloud startup.
 - [x] Wait for the installed artifact and workspace storage to become ready.
 - [x] Expose minimal `/healthz` status and authenticated diagnostic detail.
 - [x] Stop the workspace if its research process exits, allowing host recovery.
-- [x] Configure Render to use an HTTP readiness check rather than an open port.
-- [ ] Verify the deployed HTTPS URL in your Render account.
+- [x] Configure the host to use an HTTP readiness check rather than an open port.
+- [ ] Verify the deployed HTTPS URL in your Railway account.
 
 Acceptance: a healthy full app returns 200 from `/healthz`; a missing or failed
 model/storage component produces 503. No secrets or research data are public.
@@ -28,7 +28,7 @@ availability or model approval.
 - [ ] Test a restore using a backup from the deployed persistent disk.
 
 Acceptance: original receipts and audits survive a snapshot/restore; modified
-backup files fail verification. A backup kept only on the same Render disk is
+backup files fail verification. A backup kept only on the same service volume is
 not independent disaster recovery. The tool snapshots each database separately;
 there is no cross-database transaction guarantee.
 
@@ -76,13 +76,13 @@ participation. Keep HOLD until the separate evidence review is complete.
 
 ## Account-dependent launch sequence
 
-1. Create/connect Render, select `codex/render-private-api` and review charges.
-2. Deploy the Blueprint with its persistent disk and generated app secrets.
+1. Create/connect Railway, select `codex/render-private-api` and review charges.
+2. Deploy with the persistent volume and privately configured app secrets.
 3. Check HTTPS, browser login, API authentication and `/healthz`.
 4. Save a synthetic receipt, restart, and retrieve the original record.
 5. Take a backup, copy it off-host, verify it and perform an isolated restore.
 6. Only then begin the independently sourced data and forward-validation steps.
 
 Code and local tests do not establish that these account actions have happened.
-You confirmed that the Render service has not been created yet. Deployment URL,
+Railway is now the selected host; no service has been created here. Deployment URL,
 on-host recovery checks and off-host backups remain pending your account setup.

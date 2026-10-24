@@ -9,7 +9,7 @@ COPY next_app/research_runtime/ ./
 RUN npm run build
 
 FROM python:3.12-slim-bookworm
-RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 tini \
+RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 tini util-linux \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 10001 edgeboard \
     && mkdir -p /var/data && chown edgeboard:edgeboard /var/data
@@ -24,9 +24,10 @@ COPY next_app/research_runtime/runtime.mjs ./next_app/research_runtime/runtime.m
 COPY --from=research-build /build/dist/ ./next_app/research_runtime/dist/
 COPY --from=research-build /build/build/ ./next_app/research_runtime/build/
 COPY next_app/render-start.sh ./next_app/render-start.sh
+COPY next_app/start.sh ./next_app/start.sh
 RUN chmod -R a+rX /app
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PORT=10000
 USER edgeboard
 EXPOSE 10000
 ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
-CMD ["sh", "next_app/render-start.sh"]
+CMD ["sh", "next_app/start.sh"]

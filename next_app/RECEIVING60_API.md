@@ -4,7 +4,7 @@
 artifact. `GET /api/receiving60/readiness` returns integrity and readiness details.
 Both accept your `Authorization: Bearer <WORKSPACE_API_KEY>` header. Browser
 clients can use workspace login plus their existing workspace token instead.
-The Node research runtime must be built and running; Render's Docker image
+The Node research runtime must be built and running; the deployment Docker image
 includes it. No external odds provider is needed for this scorer.
 
 ## Request
@@ -52,7 +52,7 @@ comparable forward validation.
 
 ## Synthetic request example
 
-Set `EDGEBOARD_URL` to your HTTPS Render URL and `WORKSPACE_API_KEY` privately in
+Set `EDGEBOARD_URL` to your HTTPS deployment URL and `WORKSPACE_API_KEY` privately in
 your local environment. This example creates **synthetic input**, not a real
 player prediction. Replace the IDs, schedule and history with actual records
 for research use. It prints the response without printing your API key.
@@ -160,7 +160,7 @@ Use `GET /api/receiving60/receipts?before=<nextCursor>` for the next page.
 All routes use the existing workspace authentication. The browser can view and
 download saved records after reload.
 
-Records live in `workspace.sqlite3` on Render's persistent disk. SQLite triggers
+Records live in `workspace.sqlite3` on the persistent volume. SQLite triggers
 block updates and deletion through normal application/database operations; the
 record and audit entry are saved in one transaction. This is not an externally
 attested timestamp or a tamper-proof system against a database administrator.

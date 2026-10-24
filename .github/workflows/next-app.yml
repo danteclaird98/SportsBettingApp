@@ -2,9 +2,9 @@ name: EdgeBoard app checks
 on:
   push:
     branches: [main, codex/render-private-api]
-    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', '.dockerignore', '.github/workflows/next-app.yml']
+    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', 'railway.json', '.dockerignore', '.github/workflows/next-app.yml']
   pull_request:
-    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', '.dockerignore', '.github/workflows/next-app.yml']
+    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', 'railway.json', '.dockerignore', '.github/workflows/next-app.yml']
 permissions:
   contents: read
 jobs:
@@ -41,7 +41,9 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Desktop and mobile workflows
         run: python next_app/tests/browser_check.py
-      - name: Build Render image
+      - name: Build deployment image
         run: docker build -f next_app/Dockerfile -t edgeboard-render:ci .
       - name: Container access, backup and restart recovery
         run: python next_app/tests/container_check.py --image edgeboard-render:ci
+      - name: Railway root-owned volume and unprivileged app recovery
+        run: python next_app/tests/container_check.py --image edgeboard-render:ci --railway

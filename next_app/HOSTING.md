@@ -1,6 +1,12 @@
 # Private single-owner hosting preparation
 
-## Render setup
+## Selected host: Railway
+
+Use [RAILWAY.md](RAILWAY.md) for the current setup. The configuration uses
+`railway.json`, the existing Docker image, a volume at `/var/data` and your
+private app credentials. No host has been provisioned yet.
+
+## Previous Render configuration (optional alternative)
 
 The repository root now includes `render.yaml` and `next_app/Dockerfile`.
 The Blueprint prepares one Starter Docker web service and a 1 GB persistent
