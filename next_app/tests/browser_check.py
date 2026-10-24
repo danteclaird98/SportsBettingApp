@@ -20,7 +20,8 @@ with TemporaryDirectory() as tmp:
     Thread(target=server.serve_forever,daemon=True).start()
     try:
         with sync_playwright() as p:
-            browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+            executable=os.environ.get('CHROMIUM_PATH') or ('/usr/bin/chromium' if Path('/usr/bin/chromium').is_file() else None)
+            browser=p.chromium.launch(executable_path=executable,headless=True,args=['--no-sandbox'])
             page=browser.new_page(viewport={'width':1440,'height':1050})
             errors=[]
             page.on('pageerror',lambda e:errors.append(str(e)))

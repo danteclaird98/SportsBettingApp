@@ -22,9 +22,11 @@ and connected; hosting the application does not supply a sports-data feed.
 5. Open `/advanced/` and use its local-owner sign-in. Provider-backed tools will
    show unavailable states until an authorized source has been connected.
 
-The Blueprint uses Render's default TCP health check because all HTTP routes
-require authentication. A successful TCP check does not verify provider access
-or the advanced runtime; inspect both interfaces after deployment.
+The Blueprint uses `/healthz` for HTTP readiness. This public probe returns only
+a status and verifies workspace storage readability and the installed model.
+Every user-data/API route still requires workspace authentication. Detailed
+checks are available at authenticated `/api/system/readiness`. See
+[OPERATIONS.md](OPERATIONS.md) for backups and isolated restore tests.
 
 ### Your app's API key
 

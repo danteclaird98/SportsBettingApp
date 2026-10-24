@@ -56,6 +56,11 @@ Captured source prices can be stale or unverified; every quote retains the exist
 
 ## Scope carried forward and remaining migration
 
+See [DELIVERY_PLAN.md](DELIVERY_PLAN.md) for small delivery milestones and
+account-dependent launch tasks, and [OPERATIONS.md](OPERATIONS.md) for health
+checks, backup/restore and release checks. The Render launcher now requires a
+healthy research runtime; `/healthz` exposes only public readiness status.
+
 See [MIGRATION.md](MIGRATION.md). All seven repositories were cloned to `/workspace/sources/`; exact revisions are recorded in [sources.json](sources.json). Repository availability does not establish working hosted integrations.
 
 ## Full research suite migration
@@ -84,4 +89,4 @@ The browser check runs a temporary server with disposable databases, checks desk
 
 Validated locally: 7 new backend test groups, 140 existing EdgeOdds tests, JavaScript syntax, and Chromium flows covering demo filtering, slip review, de-vig arithmetic, persistent paper wager settlement, model reports, provenance, export, mobile overflow and browser errors. Synthetic tests establish software behavior, not betting performance.
 
-Additional migrated-runtime checks: `npm run build`, `npm run test:model` (8 pass, 1 real-data cohort check skipped without pinned raw CSVs), `node --test compat/runtime.test.mjs` (CRUD, owner separation, transactions and rollback), and 2 Python receiving-model tests. Browser checks opened the migrated Advanced Research and My Wagers views without JavaScript exceptions. The protected storage diagnostic returned 401 signed out and completed create/read/update/delete signed in.
+Additional migrated-runtime checks: `npm run build`, `npm run test:model` (10 pass, 1 real-data cohort check skipped without pinned raw CSVs), `node --experimental-test-isolation=none --test compat/runtime.test.mjs` (CRUD, owner separation, transactions and rollback), and 2 Python receiving-model tests. Browser checks opened the migrated Advanced Research and My Wagers views without JavaScript exceptions. The protected storage diagnostic returned 401 signed out and completed create/read/update/delete signed in. The current workspace suite has 22 tests covering access, readiness, receipts, accounting and backup/restore. GitHub Actions runs the suites, browser workflows and Render image build.

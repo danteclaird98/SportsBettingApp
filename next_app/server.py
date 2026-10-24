@@ -4,12 +4,14 @@ import argparse
 import base64
 import binascii
 import hashlib
-import atexit
 import subprocess
+import signal
+from threading import Event, Thread
+import time
 import mimetypes
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
-from contextlib import contextmanager
+from contextlib import contextmanager, closing
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -227,6 +229,48 @@ def access_credentials(host):
     return (username, password) if password else None
 
 
+def system_readiness(workspace):
+    storage_ready=False
+    runtime_ready=False
+    artifact_verified=False
+    try:
+        uri=Path(workspace.path).resolve().as_uri()+'?mode=ro'
+        with closing(sqlite3.connect(uri,uri=True,timeout=1)) as db:
+            storage_ready=db.execute('SELECT id FROM settings WHERE id=1').fetchone() is not None
+            db.execute('SELECT id FROM receiving60_receipts LIMIT 1').fetchall()
+    except (OSError,sqlite3.Error):
+        storage_ready=False
+    try:
+        with urlopen('http://127.0.0.1:8091/api/corrected-receiving-readiness',timeout=2) as response:
+            result=json.loads(response.read(65537))
+        artifact_verified=isinstance(result,dict) and result.get('artifactVerified') is True
+        runtime_ready=artifact_verified and result.get('status')=='HOLD' and result.get('liveApproved') is False
+    except (OSError,ValueError,TypeError):
+        pass
+    return {'ready':storage_ready and runtime_ready,'workspaceStorageReadable':storage_ready,
+            'researchRuntimeReady':runtime_ready,'artifactVerified':artifact_verified,
+            'liveApproved':False,'checkedAt':now()}
+
+
+def stop_research(child):
+    if child is not None and child.poll() is None:
+        child.terminate()
+        try: child.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            child.kill(); child.wait(timeout=5)
+
+
+def wait_for_research(child,workspace,timeout=15):
+    deadline=time.monotonic()+timeout
+    while time.monotonic()<deadline:
+        if child.poll() is not None:
+            raise RuntimeError('Research runtime exited during startup; inspect backend startup logs')
+        if system_readiness(workspace)['ready']:
+            return
+        time.sleep(.1)
+    raise RuntimeError('Research runtime failed its storage/model readiness check')
+
+
 def make_handler(workspace, store, token, credentials=None, api_key=None):
     class Handler(BaseHTTPRequestHandler):
         def log_message(self,*args): pass
@@ -316,6 +360,9 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
             except sqlite3.Error: self.reply(503,{'error':'Research receipt storage unavailable; nothing saved'})
 
         def do_GET(self):
+            if urlsplit(self.path).path == '/healthz':
+                ready=system_readiness(workspace)['ready']
+                return self.reply(200 if ready else 503,{'status':'ok' if ready else 'unavailable'})
             if not self.authorized(): return
             parsed=urlsplit(self.path)
             if parsed.path == '/api/receiving60/readiness':
@@ -330,6 +377,10 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
                     return self.reply(404,{'error':'Build research runtime with npm run build first'})
                 return self.reply(200,target.read_bytes(),mimetypes.guess_type(str(target))[0] or 'application/octet-stream')
             try:
+                if parsed.path == '/api/system/readiness':
+                    result=system_readiness(workspace)
+                    return self.reply(200 if result['ready'] else 503,{**result,
+                        'browserAuthenticationConfigured':credentials is not None,'apiKeyConfigured':bool(api_key)})
                 if parsed.path == '/api/receiving60/receipts':
                     value=parse_qs(parsed.query).get('before',[None])[0]
                     before=int(value) if value is not None else None
@@ -385,6 +436,7 @@ def main():
     parser.add_argument('--host',default='127.0.0.1',help='External binding requires password protection and an HTTPS reverse proxy')
     parser.add_argument('--data-dir',type=Path,default=ROOT/'data')
     parser.add_argument('--odds-db',type=Path,help='Existing EdgeOdds ingestion SQLite database')
+    parser.add_argument('--require-research',action='store_true',help='Refuse startup without a healthy built research runtime')
     args=parser.parse_args()
     try:
         credentials=access_credentials(args.host)
@@ -396,12 +448,31 @@ def main():
     workspace=Workspace(args.data_dir/'workspace.sqlite3')
     store=IngestionStore(args.odds_db or args.data_dir/'edgeodds.sqlite3')
     runtime=ROOT/'research_runtime'
+    child=None
     if (runtime/'build/backend.mjs').is_file():
-        env=dict(os.environ,RESEARCH_DB=str((args.data_dir/'research.sqlite3').resolve()))
+        env=dict(os.environ,RESEARCH_DB=str((args.data_dir/'research.sqlite3').resolve()),RESEARCH_PORT='8091')
         child=subprocess.Popen(['node','runtime.mjs'],cwd=runtime,env=env)
-        atexit.register(child.terminate)
-    server=ThreadingHTTPServer((args.host,args.port),make_handler(workspace,store,secrets.token_urlsafe(32),credentials,api_key))
-    print(f'EdgeBoard Next: http://{args.host}:{args.port}',flush=True)
-    server.serve_forever()
+        try: wait_for_research(child,workspace)
+        except RuntimeError as exc:
+            stop_research(child); parser.error(str(exc))
+    elif args.require_research:
+        parser.error('Build the research runtime with npm run build before starting')
+    stopped=Event(); failed=Event()
+    try:
+        server=ThreadingHTTPServer((args.host,args.port),make_handler(workspace,store,secrets.token_urlsafe(32),credentials,api_key))
+        def monitor():
+            while not stopped.wait(1):
+                if child.poll() is not None:
+                    print('Research runtime exited; stopping workspace for service restart',file=sys.stderr,flush=True)
+                    failed.set(); server.shutdown(); return
+        if child is not None: Thread(target=monitor,daemon=True).start()
+        def terminate(signum,frame): raise KeyboardInterrupt
+        signal.signal(signal.SIGTERM,terminate)
+        print(f'EdgeBoard Next: http://{args.host}:{args.port}',flush=True)
+        try: server.serve_forever()
+        except KeyboardInterrupt: pass
+        finally: stopped.set(); server.server_close()
+    finally: stop_research(child)
+    if failed.is_set(): raise SystemExit(1)
 
 if __name__=='__main__': main()

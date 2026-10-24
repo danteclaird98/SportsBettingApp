@@ -17,6 +17,7 @@ COPY --from=research-build /usr/local/bin/node /usr/local/bin/node
 WORKDIR /app
 COPY edgeodds/ ./edgeodds/
 COPY next_app/server.py next_app/sources.json ./next_app/
+COPY next_app/backup.py ./next_app/backup.py
 COPY next_app/web/ ./next_app/web/
 COPY next_app/reports/ ./next_app/reports/
 COPY next_app/research_runtime/runtime.mjs ./next_app/research_runtime/runtime.mjs

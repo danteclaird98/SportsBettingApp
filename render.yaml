@@ -7,6 +7,7 @@ services:
     dockerContext: .
     autoDeployTrigger: "off"
     numInstances: 1
+    healthCheckPath: /healthz
     envVars:
       - key: WORKSPACE_USER
         value: owner

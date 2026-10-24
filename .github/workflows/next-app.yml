@@ -1,0 +1,47 @@
+name: EdgeBoard app checks
+on:
+  push:
+    branches: [main, codex/render-private-api]
+    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', '.dockerignore', '.github/workflows/next-app.yml']
+  pull_request:
+    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', '.dockerignore', '.github/workflows/next-app.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: next_app/research_runtime/package-lock.json
+      - name: Workspace, backup, readiness and research controls
+        run: |
+          python -m unittest discover -s next_app/tests -v
+          python -m unittest discover -s edgeodds/tests -q
+          python -m unittest discover -s next_app/research_runtime/research/receiving60 -v
+          node --check next_app/web/app.js
+          node --check next_app/web/receiving60.js
+      - name: Build research runtime and check frozen models
+        working-directory: next_app/research_runtime
+        run: |
+          npm ci
+          npm run test:model
+          npm run build
+          node --experimental-test-isolation=none --test compat/runtime.test.mjs
+      - name: Install test browser
+        run: |
+          python -m pip install -r next_app/requirements-test.txt
+          python -m playwright install --with-deps chromium
+      - name: Desktop and mobile workflows
+        run: python next_app/tests/browser_check.py
+      - name: Build Render image
+        run: docker build -f next_app/Dockerfile -t edgeboard-render:ci .
+      - name: Container access, backup and restart recovery
+        run: python next_app/tests/container_check.py --image edgeboard-render:ci
