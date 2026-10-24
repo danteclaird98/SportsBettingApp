@@ -37,7 +37,9 @@ there is no cross-database transaction guarantee.
 - [x] Add GitHub Actions for backend, model, storage, browser and image checks.
 - [x] Use test isolation settings that execute and report the model assertions.
 - [x] Record the missing real-data cohort as skipped, not validated.
-- [ ] Observe the new workflow's result on GitHub after pushing.
+- [x] Observe the new workflow's result on GitHub after pushing. Both push and
+  pull-request runs passed for implementation commit `e0fab358133670d28a69f8d49ac43659cea4f6e3`:
+  [full CI result](https://github.com/danteclaird98/SportsBettingApp/actions/runs/40063155316).
 
 Acceptance: a failed assertion fails CI. Both desktop and mobile research flows
 must score, abstain, save, reload and download matching request/response pairs.
@@ -82,3 +84,5 @@ participation. Keep HOLD until the separate evidence review is complete.
 6. Only then begin the independently sourced data and forward-validation steps.
 
 Code and local tests do not establish that these account actions have happened.
+You confirmed that the Render service has not been created yet. Deployment URL,
+on-host recovery checks and off-host backups remain pending your account setup.
