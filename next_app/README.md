@@ -4,9 +4,9 @@ A new standalone sports research and manual wager tracking app, built from the d
 
 ## Hosting
 
-Railway is the selected host. Follow [RAILWAY.md](RAILWAY.md) to connect the
-GitHub branch, persistent volume and private app credentials. Deployment is
-prepared in `railway.json`; no Railway account or service has been created here.
+Fly.io is the selected host after Railway paused new signups. Follow
+[FLY.md](FLY.md) for the prepared `fly.toml`, persistent volume and private app
+credentials. No live Fly resources have been provisioned here.
 
 ## Run
 

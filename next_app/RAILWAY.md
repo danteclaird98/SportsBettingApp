@@ -1,6 +1,8 @@
 # Deploy EdgeBoard on Railway
 
-Railway is the selected hosting target. The repository's `railway.json` uses
+Railway is a prepared alternative; Fly.io is now the selected host. As checked
+on 2026-10-24, Railway temporarily paused new signups; see
+https://status.railway.com/ for reopening information. The repository's `railway.json` uses
 the existing Docker image, `/healthz`, and restart-on-failure settings. No live
 Railway project has been created by this change.
 

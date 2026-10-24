@@ -8,7 +8,7 @@ RUN --mount=type=secret,id=proxy_ca \
 COPY next_app/research_runtime/ ./
 RUN npm run build
 
-FROM python:3.12-slim-bookworm
+FROM python:3.12-slim-bookworm AS runtime-base
 RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 tini util-linux \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 10001 edgeboard \
@@ -31,3 +31,11 @@ USER edgeboard
 EXPOSE 10000
 ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
 CMD ["sh", "next_app/start.sh"]
+
+# Fly mounts persistent disks independently of image directory ownership.
+# Startup initializes only the mount directory and drops back to UID 10001.
+FROM runtime-base AS fly-runtime
+USER root
+
+# Preserve unprivileged default builds for local use and other hosts.
+FROM runtime-base AS runtime

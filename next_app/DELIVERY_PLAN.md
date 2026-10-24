@@ -4,14 +4,14 @@ This plan follows the current single-owner receiving60 research workflow. Your
 app has its own API key; no external odds provider is selected. A working app,
 trusted data and validated predictions are separate milestones.
 
-## 1. Reliable Railway operation
+## 1. Reliable Fly.io operation
 
 - [x] Require the built research runtime and all app secrets in cloud startup.
 - [x] Wait for the installed artifact and workspace storage to become ready.
 - [x] Expose minimal `/healthz` status and authenticated diagnostic detail.
 - [x] Stop the workspace if its research process exits, allowing host recovery.
 - [x] Configure the host to use an HTTP readiness check rather than an open port.
-- [ ] Verify the deployed HTTPS URL in your Railway account.
+- [ ] Verify the deployed HTTPS URL in your Fly.io account.
 
 Acceptance: a healthy full app returns 200 from `/healthz`; a missing or failed
 model/storage component produces 503. No secrets or research data are public.
@@ -76,7 +76,7 @@ participation. Keep HOLD until the separate evidence review is complete.
 
 ## Account-dependent launch sequence
 
-1. Create/connect Railway, select `codex/render-private-api` and review charges.
+1. Use your Fly.io account, open `codex/render-private-api` and review charges.
 2. Deploy with the persistent volume and privately configured app secrets.
 3. Check HTTPS, browser login, API authentication and `/healthz`.
 4. Save a synthetic receipt, restart, and retrieve the original record.
@@ -84,5 +84,6 @@ participation. Keep HOLD until the separate evidence review is complete.
 6. Only then begin the independently sourced data and forward-validation steps.
 
 Code and local tests do not establish that these account actions have happened.
-Railway is now the selected host; no service has been created here. Deployment URL,
+Fly.io is now the selected host after Railway paused new signups; no service
+has been created here. Deployment URL,
 on-host recovery checks and off-host backups remain pending your account setup.

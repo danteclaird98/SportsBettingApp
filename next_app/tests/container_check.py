@@ -129,7 +129,9 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--image',default='edgeboard-render:local')
     parser.add_argument('--railway',action='store_true',help='Simulate a root-owned Railway mount and UID override')
+    parser.add_argument('--fly',action='store_true',help='Simulate a Fly volume using the fly-runtime image target')
     args=parser.parse_args()
+    if args.fly and args.railway: parser.error('Choose one simulated host')
     env=dict(os.environ,WORKSPACE_USER='owner',WORKSPACE_PASSWORD=secrets.token_urlsafe(32),WORKSPACE_API_KEY=secrets.token_urlsafe(32))
     for key in ('DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'): env.pop(key,None)
     prefix=['docker','--host=unix:///var/run/docker.sock']
@@ -142,12 +144,13 @@ def main():
     try:
         docker('volume','create',volume)
         options=[]
-        if args.railway:
+        if args.railway or args.fly:
+            platform=['-e','FLY_APP_NAME=smoke'] if args.fly else ['-e','RAILWAY_ENVIRONMENT_ID=smoke']
             docker('run','--rm','-e','WORKSPACE_USER','-e','WORKSPACE_PASSWORD','-e','WORKSPACE_API_KEY',
-                '-e','RAILWAY_ENVIRONMENT_ID=smoke',args.image,expected=1)
+                *platform,args.image,expected=1)
             docker('run','--rm','--user','0','--entrypoint','sh','-v',volume+':/var/data',args.image,
                 '-c','chown 0:0 /var/data && chmod 700 /var/data')
-            options=['--user','0','-e','RAILWAY_ENVIRONMENT_ID=smoke','-e','RAILWAY_VOLUME_MOUNT_PATH=/var/data']
+            options=platform if args.fly else ['--user','0',*platform,'-e','RAILWAY_VOLUME_MOUNT_PATH=/var/data']
         docker('run','-d','--name',name,'-v',volume+':/var/data','-e','WORKSPACE_USER',
             '-e','WORKSPACE_PASSWORD','-e','WORKSPACE_API_KEY',*options,args.image)
         execute(PROBE)

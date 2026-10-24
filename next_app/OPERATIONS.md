@@ -2,7 +2,7 @@
 
 ## Readiness and recovery
 
-Railway uses `GET /healthz`. This is the only intentional unauthenticated
+Fly.io uses `GET /healthz`. This is the only intentional unauthenticated
 application route; it returns only `{"status":"ok"}` with 200, or
 `{"status":"unavailable"}` with 503. It checks workspace storage readability and
 the installed model's integrity through the Node research process. It does not
@@ -58,7 +58,7 @@ Do not restore by copying a database over an active process's open file.
 
 1. Confirm CI and the Docker build pass for the commit being deployed.
 2. Create and verify a backup; keep an independent copy.
-3. Deploy manually in Railway after disabling automatic deployments in service settings.
+3. Deploy manually with `fly deploy --ha=false` after reviewing the current app configuration.
 4. Confirm `/healthz`, browser login and an authenticated API request.
 5. Check one existing saved receipt and one synthetic calculation.
 6. Confirm saved data survives a service restart.

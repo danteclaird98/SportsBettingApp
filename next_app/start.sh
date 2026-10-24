@@ -8,8 +8,12 @@ if [ -n "${RAILWAY_ENVIRONMENT_ID:-}" ] && [ "${RAILWAY_VOLUME_MOUNT_PATH:-}" !=
     echo 'Attach a persistent Railway volume at /var/data before starting.' >&2
     exit 1
 fi
+if [ -n "${FLY_APP_NAME:-}" ] && ! mountpoint -q /var/data; then
+    echo 'Attach the edgeboard_data Fly volume at /var/data before starting.' >&2
+    exit 1
+fi
 if [ "$(id -u)" = 0 ]; then
-    # Railway mounts volumes as root. Initialize only the mount directory,
+    # Hosted volumes may be root-owned. Initialize only the mount directory,
     # then drop privileges before either application server starts.
     [ -d /var/data ] && [ ! -L /var/data ]
     chown --no-dereference 10001:10001 /var/data

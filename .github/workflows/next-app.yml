@@ -2,9 +2,9 @@ name: EdgeBoard app checks
 on:
   push:
     branches: [main, codex/render-private-api]
-    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', 'railway.json', '.dockerignore', '.github/workflows/next-app.yml']
+    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', 'railway.json', 'fly.toml', '.dockerignore', '.github/workflows/next-app.yml']
   pull_request:
-    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', 'railway.json', '.dockerignore', '.github/workflows/next-app.yml']
+    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', 'railway.json', 'fly.toml', '.dockerignore', '.github/workflows/next-app.yml']
 permissions:
   contents: read
 jobs:
@@ -47,3 +47,7 @@ jobs:
         run: python next_app/tests/container_check.py --image edgeboard-render:ci
       - name: Railway root-owned volume and unprivileged app recovery
         run: python next_app/tests/container_check.py --image edgeboard-render:ci --railway
+      - name: Build and verify Fly volume startup and recovery
+        run: |
+          docker build --target fly-runtime -f next_app/Dockerfile -t edgeboard-fly:ci .
+          python next_app/tests/container_check.py --image edgeboard-fly:ci --fly

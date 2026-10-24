@@ -1,8 +1,13 @@
 # Private single-owner hosting preparation
 
-## Selected host: Railway
+## Selected host: Fly.io
 
-Use [RAILWAY.md](RAILWAY.md) for the current setup. The configuration uses
+Use [FLY.md](FLY.md) for the current setup. Railway signup is currently paused;
+check https://status.railway.com/ before attempting a new account there.
+
+## Previous Railway configuration
+
+[RAILWAY.md](RAILWAY.md) documents the existing alternative. The configuration uses
 `railway.json`, the existing Docker image, a volume at `/var/data` and your
 private app credentials. No host has been provisioned yet.
 
