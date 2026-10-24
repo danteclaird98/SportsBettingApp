@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import artifact from '../backend/correctedReceivingArtifact.json' with {type:'json'};
 import report from '../backend/correctedReceivingReport.json' with {type:'json'};
 import manifest from '../backend/correctedReceivingManifest.json' with {type:'json'};
-import {createCorrectedReceivingService} from '../backend/correctedReceiving.ts';
+import {createCorrectedReceivingService,receiving60Prediction} from '../backend/correctedReceiving.ts';
 
 const now=()=>Date.parse('2026-10-26T18:00:00Z');
 const service=createCorrectedReceivingService(artifact,report,manifest,now);
@@ -13,6 +13,29 @@ const input=()=>({request:{playerId:'p1',gameId:'future',kickoffAt:'2026-11-01T2
   league:'NFL',position:'WR',seasonType:'REG',period:'FULL_GAME',stat:'receiving_yards',threshold:60,comparison:'>='},
   history:[1,8,15].map((d,i)=>({playerId:'p1',gameId:`past${i}`,kickoffAt:`2026-10-${String(d).padStart(2,'0')}T20:00:00Z`,
     resolvedAt:`2026-10-${String(d).padStart(2,'0')}T23:00:00Z`,observedAt:`2026-10-${String(d).padStart(2,'0')}T23:01:00Z`,receivingYards:[-5,60,80][i]}))});
+test('public prediction receipt preserves abstention and exposes no invented uncertainty or EV',async()=>{
+  const result=await receiving60Prediction({request:{playerId:'p1'},history:[]});
+  assert.equal(result.estimateAvailable,false);
+  assert.equal(result.probability,null);
+  assert.equal(result.reason,'INVALID_REQUEST_SCHEMA');
+  assert.equal(result.status,'HOLD');
+  assert.equal(result.liveApproved,false);
+  assert.equal(result.uncertainty,null);
+  assert.equal(result.expectedValue,null);
+  assert.equal(result.inputVerification,'UNVERIFIED_CLIENT_SUPPLIED_HISTORY');
+});
+test('public prediction matches the frozen scorer for eligible supplied history',async(t)=>{
+  t.mock.method(Date,'now',now);
+  const result=await receiving60Prediction(input());
+  const original=await service.score(input());
+  assert.equal(result.estimateAvailable,true);
+  assert.equal(result.probability,original.probability);
+  assert.equal(result.canonicalArtifactSha256,manifest.canonicalArtifactSha256);
+  assert.deepEqual(result.featureNames,['past3avg','past8avg','past3hit','past8hit','priorgames']);
+  assert.equal(result.status,'HOLD');
+  assert.equal(result.liveApproved,false);
+  assert.equal(result.executionEnabled,false);
+});
 test('frozen source hashes, readiness, metrics and independent numeric parity',async()=>{
   for(const [filename,hash] of [['correctedReceivingArtifact.json',manifest.sourceArtifactSha256],['correctedReceivingReport.json',manifest.sourceReportSha256]]) {
     const bytes=readFileSync(new URL('../backend/'+filename,import.meta.url));
@@ -50,6 +73,33 @@ test('target contamination, duplicates, missing history and nonfinite outcomes a
   const target=input();target.history[0].gameId=target.request.gameId;
   const infinite=input();infinite.history[0].receivingYards=Infinity;
   for(const value of [duplicate,target,infinite,{...input(),history:input().history.slice(0,2)}]) assert.equal((await service.score(value)).probability,null);
+});
+test('invalid yardage abstains distinctly from unavailable history clocks',async()=>{
+  for (const yards of [Infinity,-Infinity,NaN,1.5,-1.5,Number.MAX_SAFE_INTEGER+1,Number.MIN_SAFE_INTEGER-1]) {
+    const value=input(); value.history[0].receivingYards=yards;
+    const result=await service.score(value);
+    assert.equal(result.probability,null);
+    assert.equal(result.reason,'INVALID_HISTORY_YARDAGE');
+  }
+  const value=input(); value.history[0].observedAt=value.request.decisionAt;
+  assert.equal((await service.score(value)).reason,'HISTORY_NOT_AVAILABLE_AS_OF_DECISION');
+});
+test('JSON integers rounded beyond safe precision are rejected',async()=>{
+  for (const literal of ['9007199254740993','-9007199254740993']) {
+    const value=input(); value.history[0].receivingYards=JSON.parse(literal);
+    assert.notEqual(String(value.history[0].receivingYards),literal);
+    const result=await service.score(value);
+    assert.equal(result.probability,null);
+    assert.equal(result.reason,'INVALID_HISTORY_YARDAGE');
+  }
+});
+test('negative safe yardage remains in the derived averages',async()=>{
+  const value=input(); value.history[0].receivingYards=-50;
+  const result=await service.score(value);
+  assert.ok(result.probability!==null);
+  assert.ok('features' in result);
+  if (!('features' in result)) return;
+  assert.deepEqual(result.features,[30,30,2/3,2/3,3]);
 });
 test('tampered artifact and report fail closed and external mutations cannot change service',async()=>{
   const tamper=JSON.parse(JSON.stringify(artifact));tamper.intercept+=1;

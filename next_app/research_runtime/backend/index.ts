@@ -79,9 +79,13 @@ import { saveLiveSnapshot, readLiveSnapshots } from './liveQuoteStorage';
 import { halftimeOutlook } from './halftimeOutlook';
 import { checkAccountSlip } from './accountSlipAudit';
 import { verifyPublicProp } from './verifyProp';
-import { correctedReceivingReadiness, correctedReceivingReport, correctedReceivingScore } from './correctedReceiving';
+import { correctedReceivingReadiness, correctedReceivingReport, correctedReceivingScore, receiving60Prediction } from './correctedReceiving';
 
 export const handler = router({
+  'POST /api/receiving60/predict': [async ({body}) => {
+    const result=await receiving60Prediction(body);
+    return json(result,result.reason==='ARTIFACT_INTEGRITY_FAILURE'?503:result.estimateAvailable?200:422);
+  }],
   'GET /api/corrected-receiving-readiness': [async () => json(await correctedReceivingReadiness())],
   'GET /api/corrected-receiving-report': [async () => json(await correctedReceivingReport())],
   'POST /api/corrected-receiving-score': [async ({ body }) => json(await correctedReceivingScore(body))],
