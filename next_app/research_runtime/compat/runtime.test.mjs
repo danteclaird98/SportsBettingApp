@@ -1,0 +1,24 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+const dir=mkdtempSync(join(tmpdir(),'edgeboard-compat-'));
+process.env.RESEARCH_DB=join(dir,'test.sqlite3');
+const {db,requireAuth}=await import('./sdk.ts');
+test('SQLite compatibility: CRUD, ownership scopes and atomic rollback',async()=>{
+ const [id]=await db.add('owner-a',[{value:1}]);
+ assert.equal((await db.get('owner-a',[id]))[0].value,1);
+ assert.equal((await db.get('owner-b',[id]))[0],null);
+ assert.equal((await db.list('owner-a',{limit:1})).items[0].id,id);
+ const circular={};circular.self=circular;
+ await assert.rejects(db.transact([db.tx.update('owner-a',[{id,record:{value:2}}]),db.tx.update('owner-a',[{id:'bad',record:circular}])]));
+ assert.equal((await db.get('owner-a',[id]))[0].value,1);
+ await db.transact([db.tx.update('owner-a',[{id,record:{value:3}}])]);
+ assert.equal((await db.get('owner-a',[id]))[0].value,3);
+ assert.equal((await requireAuth()({user:null})).status,401);
+ assert.equal(await requireAuth()({user:{userId:'local-owner'}}),undefined);
+ assert.deepEqual(await db.delete('owner-a',[id]),[true]);
+ assert.equal((await db.get('owner-a',[id]))[0],null);
+ rmSync(dir,{recursive:true,force:true});
+});

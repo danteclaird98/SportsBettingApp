@@ -1,0 +1,30 @@
+[
+  {
+    "repository": "danteclaird98/EdgeBoard",
+    "commit": "04612cba1552a07447059099b8683e51be852385"
+  },
+  {
+    "repository": "danteclaird98/OddsHarvester",
+    "commit": "b401809986762f0690d2a976c1d63a6b12e3e60e"
+  },
+  {
+    "repository": "danteclaird98/SportsBettingApp",
+    "commit": "2da4740bb889d5d217ecf79e4142b00b39063f2c"
+  },
+  {
+    "repository": "danteclaird98/alexbet-sharp-bot",
+    "commit": "aa1ba4a2aebcbc699543ec9abcafd8a5138e552b"
+  },
+  {
+    "repository": "danteclaird98/edgeboard-appdeploy",
+    "commit": "e6d6ae3ac913fb3b6d028849c372008618ab9f35"
+  },
+  {
+    "repository": "danteclaird98/live-odds-tracker",
+    "commit": "e6e55acba89e07cad8297a5a2ac4263b30150ba7"
+  },
+  {
+    "repository": "danteclaird98/sports-odds-api-python",
+    "commit": "e1e244b820f5830530470584c36eab8f8ab575b3"
+  }
+]
