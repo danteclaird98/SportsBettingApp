@@ -109,3 +109,46 @@ Authentication failure returns `401` on the password-protected deployment.
 Inputs are not fetched or saved by this endpoint. No receipt is automatically
 entered into the prediction ledger. Keep original request/response pairs with
 their source provenance if you plan forward validation.
+
+## Optional saved research receipts
+
+The browser lab provides game-by-game history entry, optional JSON import and a
+separate **Save research receipt** action. To save from an API client, send
+`POST /api/receiving60/receipts` with your API key and exactly:
+
+```json
+{
+  "inputMode": "supplied",
+  "input": {"request": {}, "history": []},
+  "expectedArtifactSha256": "canonical artifact hash from your score response"
+}
+```
+
+Replace `input` with the complete valid request described above and use the
+64-character `canonicalArtifactSha256` returned by the scorer. For synthetic
+test inputs, set `inputMode` to `synthetic`. These input labels are client
+declarations, not independently verified provenance.
+
+The server recalculates the input before saving; it never accepts a score
+receipt from a client. An artifact mismatch returns `409`. Invalid history or
+clock checks return the scorer's `422` without saving. Numeric estimates are
+required for storage. The record preserves the request, computed score,
+server `recordedAt`, input label and `contentSha256`. New records return `201`;
+an identical stored request/score/label returns the original record with `200`.
+The hash covers sorted, compact JSON of the stored content excluding ID,
+recorded time and the hash itself (Python JSON defaults, ASCII escaping).
+
+`GET /api/receiving60/receipts` lists the newest 50 summaries and a `nextCursor`.
+Use `GET /api/receiving60/receipts?before=<nextCursor>` for the next page.
+`GET /api/receiving60/receipts/<id>` retrieves the original request and score.
+All routes use the existing workspace authentication. The browser can view and
+download saved records after reload.
+
+Records live in `workspace.sqlite3` on Render's persistent disk. SQLite triggers
+block updates and deletion through normal application/database operations; the
+record and audit entry are saved in one transaction. This is not an externally
+attested timestamp or a tamper-proof system against a database administrator.
+Saved records remain `UNVERIFIED_INPUT_RESEARCH_ONLY`, with `HOLD` and no live
+approval. Saving does not verify sources or create a qualified forward-validation
+cohort. Workspace JSON exports do not include these full records; use their
+individual download endpoints or back up the workspace SQLite database.

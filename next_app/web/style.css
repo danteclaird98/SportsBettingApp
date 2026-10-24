@@ -5,3 +5,5 @@
 .research-fields{border:0;margin:0;padding:0;min-width:0}.research-estimate{font-size:44px;letter-spacing:-1px;margin-top:20px}.research-fields textarea{font-family:ui-monospace,monospace;font-size:12px;resize:vertical}.panelbody details summary{cursor:pointer;color:var(--green);font-size:12px}
 
 .statusbox{overflow-wrap:anywhere}
+
+.history-game{border:1px solid var(--border);border-radius:7px;margin:16px 0}.history-game .panelhead{padding:12px}.history-game h3{margin:0}.history-import{margin-top:22px}.history-import summary{color:var(--green);cursor:pointer}.history-import label{display:grid;gap:8px;font-size:12px;color:var(--muted)}

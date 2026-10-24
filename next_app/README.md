@@ -34,8 +34,11 @@ without an external odds-provider key and preserves the model's HOLD status.
 The **Receiving 60+ lab** in the main workspace offers the same scorer through
 browser login, a labeled synthetic example, readable abstention messages and
 downloadable request/response receipts. Editing inputs invalidates the old
-receipt. Form drafts stay in the tab until reload; they are not stored in the
-server ledger. Current player history must still be supplied.
+receipt. Prior games can be entered through ordinary form fields or optional
+JSON import. Form drafts stay in the tab until reload. **Save research receipt**
+recalculates on the server and saves an append-only request/score record in
+the workspace SQLite database, separate from wagers. Current player history
+must still be supplied and remains unverified.
 
 For private hosting preparation and the optional workspace-wide password gate,
 see [HOSTING.md](HOSTING.md). Public hosting and live provider verification still

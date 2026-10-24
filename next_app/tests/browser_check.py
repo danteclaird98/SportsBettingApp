@@ -69,17 +69,39 @@ with TemporaryDirectory() as tmp:
             assert receipt['scoreReceipt']['liveApproved'] is False
             assert 0<=receipt['scoreReceipt']['probability']<=1
             assert receipt['scoreReceipt']['features']==[45,45,2/3,2/3,3]
-            page.locator('[name=history]').fill('[]')
+            page.get_by_role('button',name='Save research receipt',exact=True).click()
+            page.get_by_role('button',name='Saved receipt #1',exact=True).wait_for()
+            assert Workspace(Path(tmp)/'work.sqlite3').receiving60_records()['receipts'][0]['id']==1
+            page.reload()
+            page.locator('nav').get_by_role('button',name='Receiving 60+ lab',exact=False).click()
+            page.get_by_role('button',name='View receipt #1',exact=True).click()
+            with page.expect_download() as saved_download:
+                page.get_by_role('button',name='Download saved receipt #1',exact=True).click()
+            saved=json.loads(Path(saved_download.value.path()).read_text())
+            assert saved['scoreReceipt']==receipt['scoreReceipt']
+            assert saved['request']==receipt['request']
+            assert saved['inputMode']=='synthetic'
+            assert saved['inputModeProvenance']=='CLIENT_DECLARED'
+            page.get_by_role('button',name='Load synthetic example').click()
+            page.locator('[name=prior-0-receivingYards]').fill('-10')
+            page.get_by_role('button',name='Calculate research estimate').click()
+            page.locator('.research-estimate').filter(has_text='%').wait_for()
+            for _ in range(3):
+                page.get_by_role('button',name='Remove game 1',exact=True).click()
             assert page.get_by_role('button',name='Download research receipt').count()==0
             page.get_by_role('button',name='Calculate research estimate').click()
             page.get_by_text('At least three prior games are required.',exact=True).wait_for()
             assert 'No estimate' in page.locator('#receiving60-result').inner_text()
+            page.get_by_text('Import history JSON',exact=True).click()
             page.locator('[name=history]').fill('invalid JSON')
-            page.get_by_role('button',name='Calculate research estimate').click()
+            page.get_by_role('button',name='Apply imported history',exact=True).click()
             page.locator('#receiving60-form .error').wait_for()
             assert page.get_by_role('button',name='Download research receipt').count()==0
             page.get_by_role('button',name='Clear inputs').click()
             assert page.locator('[name=playerId]').input_value()==''
+            page.get_by_role('button',name='Add prior game',exact=True).click()
+            assert page.locator('[name=prior-0-receivingYards]').count()==1
+            page.get_by_role('button',name='Remove game 1',exact=True).click()
             assert 'SUPPLIED / UNVERIFIED' in page.locator('#content').inner_text()
             page.get_by_role('button',name='Data & integrations',exact=False).click()
             assert page.locator('.sourcecard').count()==7
@@ -101,7 +123,7 @@ with TemporaryDirectory() as tmp:
             page.screenshot(path=str(out/'receiving60-mobile.png'),full_page=True)
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Receiving60 mobile viewport overflow'
             assert not errors,errors
-            print('PASS: desktop/mobile; demo filter; slip; price math; wager save/settle/persistence; five reports; seven sources; JSON download; receiving60 score/abstention/stale-result clearing/receipt/mobile; no JS errors')
+            print('PASS: desktop/mobile; demo filter; slip; price math; wager save/settle/persistence; five reports; seven sources; JSON download; receiving60 score/abstention/stale-result clearing/receipt persistence/reload/manual history/mobile; no JS errors')
             browser.close()
     finally:
         server.shutdown();server.server_close()

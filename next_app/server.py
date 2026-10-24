@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import base64
 import binascii
+import hashlib
 import atexit
 import subprocess
 import mimetypes
@@ -65,6 +66,13 @@ class Workspace:
             CREATE TRIGGER IF NOT EXISTS audit_no_delete BEFORE DELETE ON audit BEGIN SELECT RAISE(ABORT,'immutable audit'); END;
             CREATE TABLE IF NOT EXISTS settings(id INTEGER PRIMARY KEY CHECK(id=1), bankroll INTEGER, daily_limit INTEGER, exposure_limit INTEGER);
             INSERT OR IGNORE INTO settings VALUES(1,100000,10000,20000);
+            CREATE TABLE IF NOT EXISTS receiving60_receipts(
+              id INTEGER PRIMARY KEY, recorded_at TEXT NOT NULL,
+              content_sha256 TEXT NOT NULL UNIQUE, body TEXT NOT NULL);
+            CREATE TRIGGER IF NOT EXISTS receiving60_no_update BEFORE UPDATE ON receiving60_receipts
+              BEGIN SELECT RAISE(ABORT,'immutable research receipt'); END;
+            CREATE TRIGGER IF NOT EXISTS receiving60_no_delete BEFORE DELETE ON receiving60_receipts
+              BEGIN SELECT RAISE(ABORT,'immutable research receipt'); END;
             ''')
         os.chmod(self.path, 0o600)
 
@@ -84,6 +92,46 @@ class Workspace:
                     'settings':dict(db.execute('SELECT * FROM settings').fetchone()),
                     'audit_count':db.execute('SELECT count(*) FROM audit').fetchone()[0],
                     'storage':'Local SQLite · single user'}
+
+    def save_receiving60(self, payload, result, input_mode):
+        content={'inputMode':input_mode,'inputModeProvenance':'CLIENT_DECLARED','request':payload,'scoreReceipt':result,
+                 'researchStatus':'UNVERIFIED_INPUT_RESEARCH_ONLY'}
+        body=json.dumps(content,sort_keys=True,separators=(',',':'),allow_nan=False)
+        digest=hashlib.sha256(body.encode()).hexdigest()
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            existing=db.execute('SELECT * FROM receiving60_receipts WHERE content_sha256=?',(digest,)).fetchone()
+            if existing:
+                return self._receiving60_record(existing),False
+            recorded_at=now()
+            cursor=db.execute('INSERT INTO receiving60_receipts(recorded_at,content_sha256,body) VALUES(?,?,?)',
+                (recorded_at,digest,body))
+            db.execute('INSERT INTO audit(at,action,payload) VALUES(?,?,?)',
+                (recorded_at,'receiving60_receipt_saved',json.dumps({'id':cursor.lastrowid,'contentSha256':digest})))
+            row=db.execute('SELECT * FROM receiving60_receipts WHERE id=?',(cursor.lastrowid,)).fetchone()
+            return self._receiving60_record(row),True
+
+    @staticmethod
+    def _receiving60_record(row):
+        return {'id':row['id'],'recordedAt':row['recorded_at'],'contentSha256':row['content_sha256'],**json.loads(row['body'])}
+
+    def receiving60_record(self, record_id):
+        with self.connect() as db:
+            row=db.execute('SELECT * FROM receiving60_receipts WHERE id=?',(record_id,)).fetchone()
+            return self._receiving60_record(row) if row else None
+
+    def receiving60_records(self, before=None):
+        with self.connect() as db:
+            rows=db.execute('SELECT * FROM receiving60_receipts WHERE (? IS NULL OR id<?) ORDER BY id DESC LIMIT 51',
+                (before,before)).fetchall()
+        records=[]
+        for row in rows[:50]:
+            item=self._receiving60_record(row)
+            target=item['request']['request']; score=item['scoreReceipt']
+            records.append({key:item[key] for key in ('id','recordedAt','contentSha256','inputMode','researchStatus')} |
+                {'playerId':target['playerId'],'gameId':target['gameId'],'probability':score['probability'],
+                 'status':score['status'],'modelVersion':score['modelVersion']})
+        return {'receipts':records,'nextCursor':rows[49]['id'] if len(rows)>50 else None,'limit':50}
 
     def mutate(self, route, data):
         with self.connect() as db:
@@ -235,6 +283,38 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
             except (URLError,TimeoutError): self.reply(503,{'error':'Research runtime is unavailable. Start using next_app/server.py.'})
             except (ValueError,TypeError): self.reply(400,{'error':'Invalid research request'})
 
+        def save_receiving60_receipt(self):
+            try:
+                length=int(self.headers.get('Content-Length','0'))
+                if not 0 < length <= 1048576: raise ValueError('Request too large or empty')
+                data=json.loads(self.rfile.read(length))
+                if not isinstance(data,dict) or set(data)!={'inputMode','input','expectedArtifactSha256'}:
+                    raise ValueError('Send inputMode, input and expectedArtifactSha256; client score receipts are not accepted')
+                if data['inputMode'] not in ('synthetic','supplied'):
+                    raise ValueError('Choose synthetic or supplied inputMode')
+                if not isinstance(data['expectedArtifactSha256'],str) or len(data['expectedArtifactSha256'])!=64:
+                    raise ValueError('Provide the canonical artifact hash from the score receipt')
+                upstream=Request('http://127.0.0.1:8091/api/receiving60/predict',
+                    data=json.dumps(data['input'],allow_nan=False).encode(),method='POST',headers={'Content-Type':'application/json'})
+                try:
+                    with urlopen(upstream,timeout=30) as response: result=json.load(response)
+                except HTTPError as exc:
+                    with exc: return self.reply(exc.code,json.load(exc))
+                if not isinstance(result,dict):
+                    return self.reply(503,{'error':'Invalid research response; nothing saved'})
+                if result.get('canonicalArtifactSha256')!=data['expectedArtifactSha256']:
+                    return self.reply(409,{'error':'Model artifact changed. Calculate again before saving.'})
+                if (result.get('estimateAvailable') is not True or result.get('status')!='HOLD'
+                    or type(result.get('probability')) not in (int,float)
+                    or not 0 <= result['probability'] <= 1
+                    or any(result.get(key) is not False for key in ('liveApproved','productionEnabled','executionEnabled','verifiedPositiveEv'))):
+                    return self.reply(503,{'error':'Unexpected research score receipt; nothing saved'})
+                record,created=workspace.save_receiving60(data['input'],result,data['inputMode'])
+                self.reply(201 if created else 200,record)
+            except (URLError,TimeoutError): self.reply(503,{'error':'Research runtime unavailable; nothing saved'})
+            except (ValueError,TypeError,KeyError) as exc: self.reply(400,{'error':str(exc)})
+            except sqlite3.Error: self.reply(503,{'error':'Research receipt storage unavailable; nothing saved'})
+
         def do_GET(self):
             if not self.authorized(): return
             parsed=urlsplit(self.path)
@@ -250,6 +330,17 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
                     return self.reply(404,{'error':'Build research runtime with npm run build first'})
                 return self.reply(200,target.read_bytes(),mimetypes.guess_type(str(target))[0] or 'application/octet-stream')
             try:
+                if parsed.path == '/api/receiving60/receipts':
+                    value=parse_qs(parsed.query).get('before',[None])[0]
+                    before=int(value) if value is not None else None
+                    if before is not None and not 0 < before <= 9223372036854775807: raise ValueError('Invalid receipt cursor')
+                    return self.reply(200,workspace.receiving60_records(before))
+                if parsed.path.startswith('/api/receiving60/receipts/'):
+                    value=parsed.path.removeprefix('/api/receiving60/receipts/')
+                    if not value.isascii() or not value.isdecimal() or not 0 < int(value) <= 9223372036854775807:
+                        raise ValueError('Invalid receipt ID')
+                    record=workspace.receiving60_record(int(value))
+                    return self.reply(200,record) if record else self.reply(404,{'error':'Research receipt not found'})
                 if parsed.path == '/api/bootstrap':
                     return self.reply(200,{'csrf':token,'state':workspace.state(),'sources':json.loads((ROOT/'sources.json').read_text())})
                 if parsed.path == '/api/board':
@@ -274,7 +365,8 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
             if urlsplit(self.path).path.startswith('/research-api/'):
                 return self.research_proxy()
             if not self.api_authenticated and not secrets.compare_digest(self.headers.get('X-Workspace-Token',''),token): return self.reply(403,{'error':'Reload this workspace before saving'})
-            if self.headers.get('Sec-Fetch-Site') == 'cross-site': return self.reply(403,{'error':'Cross-site request rejected'})
+            if urlsplit(self.path).path == '/api/receiving60/receipts':
+                return self.save_receiving60_receipt()
             try:
                 length=int(self.headers.get('Content-Length','0'))
                 if not 0 < length <= 65536: raise ValueError('Request too large or empty')

@@ -87,6 +87,8 @@ Mount persistent storage at the selected data directory. It holds the workspace,
 captured odds and advanced research SQLite databases. Run a single instance with
 a writable volume, back up all databases using SQLite-aware backups or while
 the service is stopped, and verify restore before storing actual ticket records.
+The workspace database also holds explicitly saved receiving60 research receipts;
+their list and individual downloads remain available without the Node scorer.
 Run under an unprivileged service account and restart the entire process group
 on failure. This document prepares deployment; no host has been provisioned.
 
