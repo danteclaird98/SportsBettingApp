@@ -1,4 +1,6 @@
 import base64
+from io import BytesIO
+import json
 from http.server import ThreadingHTTPServer
 import os
 from pathlib import Path
@@ -53,6 +55,28 @@ class AccessTests(unittest.TestCase):
                 with urlopen(Request(base+'/api/models', headers=bearer), timeout=3) as response:
                     self.assertEqual(response.status, 200)
                     self.assertNotIn(b'test-app-key', response.read())
+                # Exercise the public route through the real HTTP/auth boundary.
+                # The upstream scorer is tested separately against its frozen artifact.
+                with patch('next_app.server.urlopen') as upstream:
+                    for path, target, data in (
+                        ('/api/receiving60/readiness','/api/corrected-receiving-readiness',None),
+                        ('/api/receiving60/predict','/api/receiving60/predict',b'{"request":{},"history":[]}')):
+                        result=BytesIO(b'{"status":"HOLD","probability":null}')
+                        result.status=200
+                        upstream.return_value=result
+                        with urlopen(Request(base+path,headers=bearer,data=data),timeout=3) as response:
+                            self.assertEqual(json.load(response)['status'],'HOLD')
+                        forwarded=upstream.call_args.args[0]
+                        self.assertEqual(forwarded.full_url,'http://127.0.0.1:8091'+target)
+                        self.assertEqual(forwarded.data,data)
+                        self.assertEqual(forwarded.get_header('X-local-research-user'),'local-owner')
+                        self.assertIsNone(forwarded.get_header('Authorization'))
+                    upstream.side_effect=HTTPError('http://localhost',422,'Unprocessable',{},BytesIO(b'{"reason":"INSUFFICIENT_HISTORY","probability":null}'))
+                    with self.assertRaises(HTTPError) as error:
+                        urlopen(Request(base+'/api/receiving60/predict',headers=bearer,data=b'{}'),timeout=3)
+                    self.assertEqual(error.exception.code,422)
+                    self.assertEqual(json.load(error.exception)['reason'],'INSUFFICIENT_HISTORY')
+                    error.exception.close()
                 with urlopen(Request(base+'/api/settings', headers=bearer,
                     data=b'{"bankroll":"1000","daily_limit":"10","exposure_limit":"20"}'), timeout=3) as response:
                     self.assertEqual(response.status, 200)

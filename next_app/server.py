@@ -217,14 +217,14 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
                 'X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer',
                 'Content-Security-Policy':"default-src 'self'; style-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'"}.items(): self.send_header(k,v)
             self.end_headers(); self.wfile.write(body)
-        def research_proxy(self):
+        def research_proxy(self, target_path=None):
             if not self.api_authenticated and not secrets.compare_digest(self.headers.get('X-Workspace-Token',''),token):
                 return self.reply(403,{'error':'Reload workspace before using research'})
             try:
                 length=int(self.headers.get('Content-Length','0'))
                 if not 0 <= length <= 1048576: raise ValueError('Request too large')
                 body=self.rfile.read(length) if length else None
-                target='http://127.0.0.1:8091'+self.path.removeprefix('/research-api')
+                target='http://127.0.0.1:8091'+(target_path or self.path.removeprefix('/research-api'))
                 owner='local-owner' if self.api_authenticated else self.headers.get('X-Local-Research-User','')
                 request=Request(target,data=body,method=self.command,headers={'Content-Type':'application/json','X-Local-Research-User':owner})
                 try:
@@ -238,6 +238,8 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
         def do_GET(self):
             if not self.authorized(): return
             parsed=urlsplit(self.path)
+            if parsed.path == '/api/receiving60/readiness':
+                return self.research_proxy('/api/corrected-receiving-readiness')
             if parsed.path.startswith('/research-api/'):
                 return self.research_proxy()
             if parsed.path == '/advanced' or parsed.path.startswith('/advanced/'):
@@ -267,6 +269,8 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
         def do_POST(self):
             if not self.authorized(): return
             if self.headers.get('Sec-Fetch-Site') == 'cross-site': return self.reply(403,{'error':'Cross-site request rejected'})
+            if urlsplit(self.path).path == '/api/receiving60/predict':
+                return self.research_proxy('/api/receiving60/predict')
             if urlsplit(self.path).path.startswith('/research-api/'):
                 return self.research_proxy()
             if not self.api_authenticated and not secrets.compare_digest(self.headers.get('X-Workspace-Token',''),token): return self.reply(403,{'error':'Reload this workspace before saving'})

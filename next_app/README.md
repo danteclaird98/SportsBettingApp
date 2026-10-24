@@ -28,6 +28,10 @@ Open http://127.0.0.1:8080. Use **Open full research suite** for the migrated or
 
 ## Connecting captured odds
 
+The [receiving60 prediction API](RECEIVING60_API.md) exposes the installed frozen
+research scorer using your app's API key. It accepts supplied player history
+without an external odds-provider key and preserves the model's HOLD status.
+
 For private hosting preparation and the optional workspace-wide password gate,
 see [HOSTING.md](HOSTING.md). Public hosting and live provider verification still
 require host configuration and authorized provider credentials.
