@@ -259,7 +259,7 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
                 if parsed.path == '/api/health': return self.reply(200,store.health(credential_configured=bool(os.environ.get('SPORTRADAR_API_KEY'))))
                 if parsed.path == '/api/models': return self.reply(200,{'models':report_catalog(),'live_approved':False})
                 if parsed.path == '/api/export': return self.reply(200,{'exported_at':now(),**workspace.state(),'models':report_catalog(),'sources':json.loads((ROOT/'sources.json').read_text())})
-                files={'/':'index.html','/app.js':'app.js','/style.css':'style.css'}
+                files={'/':'index.html','/app.js':'app.js','/receiving60.js':'receiving60.js','/style.css':'style.css'}
                 if parsed.path in files:
                     name=files[parsed.path]; kind='text/html; charset=utf-8' if name.endswith('html') else 'text/javascript; charset=utf-8' if name.endswith('js') else 'text/css; charset=utf-8'
                     return self.reply(200,(ROOT/'web'/name).read_bytes(),kind)

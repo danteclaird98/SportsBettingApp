@@ -31,6 +31,11 @@ Open http://127.0.0.1:8080. Use **Open full research suite** for the migrated or
 The [receiving60 prediction API](RECEIVING60_API.md) exposes the installed frozen
 research scorer using your app's API key. It accepts supplied player history
 without an external odds-provider key and preserves the model's HOLD status.
+The **Receiving 60+ lab** in the main workspace offers the same scorer through
+browser login, a labeled synthetic example, readable abstention messages and
+downloadable request/response receipts. Editing inputs invalidates the old
+receipt. Form drafts stay in the tab until reload; they are not stored in the
+server ledger. Current player history must still be supplied.
 
 For private hosting preparation and the optional workspace-wide password gate,
 see [HOSTING.md](HOSTING.md). Public hosting and live provider verification still
