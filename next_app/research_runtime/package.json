@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "vite build && npm run build:backend",
     "preview": "vite preview",
-    "test:model": "node --test tests/correctedReceiving.test.ts tests/historicalCohort.test.ts",
-    "build:backend": "esbuild backend/index.ts --bundle --platform=node --format=esm --alias:@appdeploy/sdk=./compat/sdk.ts --outfile=build/backend.mjs"
+    "test:model": "node --experimental-test-isolation=none --test tests/correctedReceiving.test.ts tests/historicalCohort.test.ts",
+    "build:backend": "esbuild backend/index.ts --bundle --platform=node --format=esm --alias:@appdeploy/sdk=./compat/sdk.ts --outfile=build/backend.mjs",
+    "test:odds": "node --test tests/oddsBackend.test.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.469.0",

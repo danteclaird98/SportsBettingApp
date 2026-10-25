@@ -7,8 +7,9 @@ createServer(async(req,res)=>{
  if(!route)return send(404,{error:'Unknown research route'});
  try{
  let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>1048576)return send(413,{error:'Request too large'});}
+ let body={};try{body=raw?JSON.parse(raw):{};}catch{return send(400,{error:'Invalid JSON request'});}
  const user=req.headers['x-local-research-user']==='local-owner'?{userId:'local-owner'}:null;
- const ctx={query:Object.fromEntries(url.searchParams),body:raw?JSON.parse(raw):{},user,event:{user}};
+ const ctx={query:Object.fromEntries(url.searchParams),body,user,event:{user}};
  for(const fn of route){const result=await fn(ctx);if(result)return send(result.status||200,result.data);}
  send(204,null);
  }catch(e){send(500,{error:e.message||'Research failed'});}
