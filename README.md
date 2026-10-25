@@ -1,3 +1,5 @@
+**Canonical repo:** Development has moved to sports-betting-master, which consolidates this project with EdgeBoard, EdgeFusion, and the other source projects. This repo is kept for history and for the hosted-workflow recovery work in next_app/ until the port completes.
+
 ## EdgeBoard application release
 
 EdgeBoard is one app: the main workspace and the preserved research tools are served together. GitHub is the source and CI system. The internal `next_app/` directory is not a separate product. See [the release contract](docs/EDGEBOARD_RELEASE.md) and [application setup](next_app/README.md). Existing deployments and private data remain intact until a verified cutover; real-money execution stays disabled.
