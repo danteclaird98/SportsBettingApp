@@ -1,3 +1,13 @@
+## EdgeBoard application release
+
+EdgeBoard is one app: the main workspace and the preserved research tools are served together. GitHub is the source and CI system. The internal `next_app/` directory is not a separate product. See [the release contract](docs/EDGEBOARD_RELEASE.md) and [application setup](next_app/README.md). Existing deployments and private data remain intact until a verified cutover; real-money execution stays disabled.
+
+# EdgeBoard Next application
+
+The new standalone application is in [next_app/](next_app/README.md). Start it with `python next_app/server.py` and open http://127.0.0.1:8080. It includes the new market board, research slip, persistent manual wager tracker, recovered model reports and source health. See its [migration inventory](next_app/MIGRATION.md) for recovered decisions and remaining integrations.
+
+---
+
 # Sports betting research improvement candidate
 
 Status: standalone candidate, not integrated or deployed. No existing agent source, trained model, prediction ledger, or historical odds dataset was located. No model was changed. No held-out improvement claim is justified. Tests use synthetic fixtures solely to validate arithmetic and controls.
