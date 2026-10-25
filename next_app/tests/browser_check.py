@@ -143,7 +143,27 @@ with TemporaryDirectory() as tmp:
             assert '"observation_count": 1' in page.locator('#content').inner_text()
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Import mobile viewport overflow'
             page.goto(f'http://127.0.0.1:{server.server_port}/advanced/')
+            page.get_by_role('button',name='Independent model',exact=True).click()
+            page.get_by_role('heading',name='Independent probability model',exact=True).wait_for()
+            assert page.url.endswith('#model')
+            page.reload()
+            page.get_by_role('heading',name='Independent probability model',exact=True).wait_for()
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Independent model mobile overflow'
+            page.set_viewport_size({'width':1440,'height':1050})
+            page.reload()
+            page.get_by_role('heading',name='Independent probability model',exact=True).wait_for()
+            assert page.url.endswith('#model')
+            page.set_viewport_size({'width':390,'height':844})
+            def unavailable_live(route):
+                route.fulfill(status=503,json={'error':'Synthetic live source unavailable'})
+            page.route('**/research-api/api/live-board*',unavailable_live)
+            page.get_by_role('button',name='Live & 2H',exact=True).click()
+            page.get_by_role('heading',name='SportsGameOdds tracker',exact=True).wait_for()
+            page.get_by_role('button',name='Check configuration · no provider call',exact=True).click()
+            page.get_by_text('Store SPORTSGAMEODDS_KEY through the secure setup form.',exact=False).wait_for()
+            assert page.get_by_role('button',name='Load bookmaker observations · 1 request',exact=True).is_disabled()
             page.get_by_role('button',name='Advanced Research',exact=True).click()
+            page.unroute('**/research-api/api/live-board*',unavailable_live)
             report_link=page.get_by_role('link',name='Open assistant JSON report',exact=True)
             assert report_link.get_attribute('href').startswith('/research-api/api/assistant-report?')
             page.get_by_role('button',name='Models & history',exact=True).click()
@@ -156,10 +176,51 @@ with TemporaryDirectory() as tmp:
             page.get_by_role('button',name='Check backend connection',exact=True).click()
             page.get_by_text('Backend not connected. Configure the owned HTTPS service and its server-side read token.',exact=True).wait_for()
             assert page.get_by_role('button',name='Load stored events',exact=True).is_disabled()
+            # A deterministic intercepted failure exercises React's actual save/recovery workflow.
+            # This ledger never writes to the test server, let alone a hosted/private account.
+            ledger={'posts':0,'wagers':[]}
+            def mock_ledger(route):
+                if route.request.method=='POST':
+                    ledger['posts']+=1
+                    if ledger['posts']==1:
+                        return route.fulfill(status=503,json={'error':'Synthetic unavailable acknowledgement'})
+                    ledger['wagers']=route.request.post_data_json['wagers']
+                    return route.fulfill(status=200,json={'count':len(ledger['wagers']),'updatedAt':'2026-10-25T00:00:00Z'})
+                return route.fulfill(status=200,json={'wagers':ledger['wagers'],'updatedAt':None,'authenticated':True})
+            page.route('**/research-api/api/wager-ledger',mock_ledger)
+            page.get_by_role('button',name='My Wagers',exact=True).click()
+            page.get_by_role('heading',name='Research wager ledger',exact=True).wait_for()
+            sign_in=page.get_by_role('button',name='Sign in to track wagers',exact=True)
+            if sign_in.count(): sign_in.click()
+            page.get_by_text('Private ledger loaded. Changes save to your account.',exact=True).wait_for()
+            page.get_by_role('button',name='Paper wager',exact=True).click()
+            page.get_by_label('Event',exact=True).fill('Synthetic recovery fixture')
+            page.get_by_label('Market',exact=True).fill('moneyline')
+            page.get_by_label('Selection',exact=True).fill('Synthetic Home')
+            save=page.get_by_role('button',name='Save manual paper wager',exact=True)
+            save.click()
+            page.get_by_text('Save could not be confirmed. Your draft is retained. Reload saved ledger before editing or retrying.',exact=True).wait_for()
+            assert page.get_by_label('Event',exact=True).input_value()=='Synthetic recovery fixture'
+            assert page.get_by_label('Selection',exact=True).input_value()=='Synthetic Home'
+            assert save.is_disabled(), 'Unconfirmed write must require reload before retry'
+            assert ledger['posts']==1, 'No automatic write retry permitted'
+            page.get_by_role('button',name='Reload saved ledger',exact=True).click()
+            page.get_by_text('Private ledger loaded. Changes save to your account.',exact=True).wait_for()
+            assert page.get_by_label('Event',exact=True).input_value()=='Synthetic recovery fixture'
+            save.click()
+            page.get_by_text('Saved to your private account.',exact=True).wait_for()
+            assert page.get_by_label('Event',exact=True).input_value()==''
+            assert ledger['posts']==2 and len(ledger['wagers'])==1
+            assert ledger['wagers'][0]['mode']=='paper'
+            page.reload()
+            page.get_by_text('Synthetic recovery fixture',exact=True).wait_for()
+            assert page.url.endswith('#wagers')
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Research ledger mobile overflow'
+            page.unroute('**/research-api/api/wager-ledger',mock_ledger)
             page.get_by_role('link',name='Return to EdgeBoard workspace',exact=True).click()
             page.get_by_role('heading',name='A clearer view of the board.',exact=True).wait_for()
             assert not errors,errors
-            print('PASS: desktop/mobile; demo filter; slip; price math; wager save/settle/persistence; five reports; seven sources; JSON download; receiving60 score/abstention/stale-result clearing/receipt persistence/reload/manual history/mobile; no JS errors')
+            print('PASS: desktop/mobile; independent-model hash reload; research wager failed-save draft retention/reload/recovery; demo filter; slip; price math; wager save/settle/persistence; five reports; seven sources; JSON download; receiving60 score/abstention/stale-result clearing/receipt persistence/reload/manual history/mobile; no JS errors')
             browser.close()
     finally:
         server.shutdown();server.server_close()

@@ -379,7 +379,7 @@ async function fetchEspnPublicOdds(from?: string, to?: string) {
       const normalizedEvent: NormalizedOddsEvent = {
         id: `espn-${eventId}`,
         canonical_event_id: eventId,
-        commence_time: competition.date ?? event.date ?? null,
+        commence_time: competition?.date ?? event.date ?? null,
         home_team: homeTeam,
         away_team: awayTeam,
         bookmakers: [],
@@ -592,8 +592,9 @@ async function fetchKalshiContext(from?: string, to?: string) {
   }
 }
 
-export async function fetchAlternativeNflOdds(from?: string, to?: string) {
-  const names = await secrets.listSecretNames();
+export async function fetchAlternativeNflOdds(from?: string, to?: string, allowProviderRequests = false) {
+  // ESPN and Kalshi remain public; keyed feeds are never an automatic fallback.
+  const names = allowProviderRequests ? await secrets.listSecretNames() : [];
   const hasSharp = names.includes('SHARPAPI_KEY');
   const hasOddsApi = names.includes('THE_ODDS_API_KEY');
   const sharpPromise = hasSharp
@@ -604,7 +605,7 @@ export async function fetchAlternativeNflOdds(from?: string, to?: string) {
           id: 'sharpapi',
           name: 'SharpAPI',
           status: 'unconfigured' as const,
-          detail: 'Optional sportsbook fallback. Add a key to use its normalized NFL spreads and totals.',
+          detail: allowProviderRequests ? 'Optional sportsbook feed is not configured.' : 'Optional keyed feed is disabled for public scans; no provider request made.',
           eventCount: 0,
           bookCount: 0,
         },
@@ -617,7 +618,7 @@ export async function fetchAlternativeNflOdds(from?: string, to?: string) {
           id: 'theoddsapi',
           name: 'The Odds API',
           status: 'unconfigured' as const,
-          detail: 'Optional secondary sportsbook feed. Add a key to expand book coverage.',
+          detail: allowProviderRequests ? 'Optional secondary sportsbook feed is not configured.' : 'Optional keyed feed is disabled for public scans; no provider request made.',
           eventCount: 0,
           bookCount: 0,
         },

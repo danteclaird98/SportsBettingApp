@@ -78,6 +78,12 @@ test('real HTTP gateway dispatch preserves event parameters, authentication and 
   const blocked=await invalidForecast.json();
   assert.equal(blocked.executionEnabled,false);
   assert.equal(blocked.bettingDecision,'HOLD');
+  assert.equal((await fetch(base+'/api/sgo/history?owner=local-owner&league=NFL&mode=upcoming')).status,401);
+  assert.equal((await fetch(base+'/api/sgo/history?owner=other&league=NFL&mode=upcoming',{headers})).status,403);
+  const sgo=await fetch(base+'/api/sgo/status');assert.equal((await sgo.json()).executionEnabled,false);
+  const historySgo=await fetch(base+'/api/sgo/history?owner=local-owner&league=NFL&mode=upcoming',{headers});assert.equal(historySgo.status,200);assert.equal((await historySgo.json()).owner,'local-owner');
+  const ownerChanged=await fetch(base+'/api/wager-ledger',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({owner:'other',wagers:[]})});assert.equal(ownerChanged.status,403);
+  const ledger=await fetch(base+'/api/wager-ledger',{headers});assert.equal((await ledger.json()).owner,'local-owner');
   const invalid=await fetch(base+'/api/odds-backend/events/invalid',{headers});
   assert.equal(invalid.status,400);assert.equal((await invalid.json()).error,'INVALID_EVENT_ID');
   assert.equal((await fetch(base+'/api/odds-backend/latest?event_id=1&event_id=2',{headers})).status,400);

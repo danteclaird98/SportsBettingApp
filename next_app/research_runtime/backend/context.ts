@@ -129,7 +129,7 @@ async function weatherItem(input: InputEvent): Promise<GameContextItem | null> {
   } catch { return null; }
 }
 
-export async function getNflResearchContext(input: { mode?: string; events?: InputEvent[] }) {
+export async function getNflResearchContext(input: { mode?: string; events?: InputEvent[] }, allowProviderRequests = false) {
   if (input.mode === 'demo') return {
     generatedAt: new Date().toISOString(),
     health: [
@@ -142,7 +142,11 @@ export async function getNflResearchContext(input: { mode?: string; events?: Inp
     ],
   };
   const events = input.events ?? [];
-  const [clear, weatherRows] = await Promise.all([clearSports(), Promise.all(events.slice(0, 10).map(weatherItem))]);
+  const clearRequest = allowProviderRequests ? clearSports() : Promise.resolve({
+    items: [] as GameContextItem[],
+    health: { id: 'clearsports', name: 'ClearSports', status: 'unconfigured' as const, detail: 'Optional keyed context is disabled for public requests; no provider quota used.', eventCount: 0 },
+  });
+  const [clear, weatherRows] = await Promise.all([clearRequest, Promise.all(events.slice(0, 10).map(weatherItem))]);
   const weather = weatherRows.filter((item): item is GameContextItem => item !== null);
   const weatherHealth: ContextHealth = { id: 'weather', name: 'Open-Meteo', status: weather.length ? 'public' : 'partial', detail: weather.length ? 'Kickoff weather/venue context active for current edge candidates.' : 'No weather candidates matched the current edge list.', eventCount: weather.length };
   return { generatedAt: new Date().toISOString(), health: [clear.health, weatherHealth], items: [...weather, ...clear.items] };
