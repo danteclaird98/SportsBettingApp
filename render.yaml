@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: edgeboard-next
+    name: edgeboard
     runtime: docker
     plan: starter
     dockerfilePath: ./next_app/Dockerfile

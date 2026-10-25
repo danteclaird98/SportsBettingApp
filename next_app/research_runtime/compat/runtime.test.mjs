@@ -67,6 +67,17 @@ test('real HTTP gateway dispatch preserves event parameters, authentication and 
    const response=await fetch(base+path,{headers});
    assert.equal(response.status,503,path);assert.equal((await response.json()).state,'NOT_CONFIGURED');
   }
+  assert.equal((await fetch(base+'/api/receiving-forward?owner=local-owner')).status,401);
+  assert.equal((await fetch(base+'/api/receiving-forward?owner=another-owner',{headers})).status,403);
+  const history=await fetch(base+'/api/receiving-forward?owner=local-owner',{headers});
+  assert.equal(history.status,200);
+  const saved=await history.json();
+  assert.equal(saved.owner,'local-owner');
+  assert.equal(saved.executionEnabled,false);
+  const invalidForecast=await fetch(base+'/api/receiving-forecast',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:'{}'});
+  const blocked=await invalidForecast.json();
+  assert.equal(blocked.executionEnabled,false);
+  assert.equal(blocked.bettingDecision,'HOLD');
   const invalid=await fetch(base+'/api/odds-backend/events/invalid',{headers});
   assert.equal(invalid.status,400);assert.equal((await invalid.json()).error,'INVALID_EVENT_ID');
   assert.equal((await fetch(base+'/api/odds-backend/latest?event_id=1&event_id=2',{headers})).status,400);

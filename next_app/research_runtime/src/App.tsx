@@ -1,3 +1,5 @@
+import ReceivingForecast from './ReceivingForecast';
+import ReceivingValidation from './ReceivingValidation';
 import OddsBackend from './OddsBackend';
 import { useState } from 'react';
 import AccountSlipWorkspace from './AccountSlipWorkspace';
@@ -185,6 +187,8 @@ function App() {
               <div className="advancedModules">
                 <HistoricalCalibration />
                 <NflPropLab />
+                <ReceivingForecast />
+                <ReceivingValidation />
                 <CorrectedReceivingLab />
                 <PlayerBacktest />
                 <LineAwarePropLab />
