@@ -357,6 +357,7 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
                 record,created=workspace.save_receiving60(data['input'],result,data['inputMode'])
                 self.reply(201 if created else 200,record)
             except (URLError,TimeoutError): self.reply(503,{'error':'Research runtime unavailable; nothing saved'})
+            except RecursionError: self.reply(400,{'error':'JSON nesting exceeds limit'})
             except (ValueError,TypeError,KeyError) as exc: self.reply(400,{'error':str(exc)})
             except sqlite3.Error: self.reply(503,{'error':'Research receipt storage unavailable; nothing saved'})
 
@@ -430,6 +431,7 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
                     return self.reply(200,ProviderImports(Path(workspace.path)).import_payload(data))
                 self.reply(200,workspace.mutate(urlsplit(self.path).path,data))
             except sqlite3.IntegrityError: self.reply(409,{'error':'This sportsbook ticket ID is already recorded'})
+            except RecursionError: self.reply(400,{'error':'JSON nesting exceeds limit'})
             except (ValueError,TypeError,KeyError) as exc: self.reply(400,{'error':str(exc)})
             except sqlite3.Error: self.reply(503,{'error':'Storage unavailable'})
     return Handler

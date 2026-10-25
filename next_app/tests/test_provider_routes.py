@@ -46,5 +46,13 @@ class ProviderRouteTests(unittest.TestCase):
                 self.assertEqual(workspace.state()['wagers'],[])
                 payload['payload'][0]['decimal_price']=3
                 self.assertEqual(call(data=payload,headers=headers)[0],400)
+                payload['payload'][0]['decimal_price']=10**1000
+                self.assertEqual(call(data=payload,headers=headers)[0],400)
+                nested=Request(f'http://127.0.0.1:{server.server_port}/api/provider-imports',data=b'['*1500+b'0'+b']'*1500,headers=headers)
+                with self.assertRaises(HTTPError) as rejection:
+                    urlopen(nested,timeout=3)
+                self.assertEqual(rejection.exception.code,400)
+                rejection.exception.close()
+
             finally:
                 server.shutdown();server.server_close()
