@@ -1,0 +1,648 @@
+{
+  "app_id": "edgeboard-research-ai9jat",
+  "version": "1792966364427",
+  "source_file_count": 128,
+  "scope": "Complete src/backend/shared inventory; no private records or secrets exported",
+  "files": [
+    {
+      "path": "src/AccountSlipWorkspace.tsx",
+      "sha256": "694b9595a9870de11422200f61e2c4a8cfe2b96201f5a6284c32a831386a6711",
+      "bytes": 28902
+    },
+    {
+      "path": "src/AllSportsReport.tsx",
+      "sha256": "9e00c539f1a25d2b0798d010b5deedd249bf915e977bafd4d48312f7cf06d9e4",
+      "bytes": 2465
+    },
+    {
+      "path": "src/App.tsx",
+      "sha256": "f2d9d7bcb7731cea31414d6e350d21d5b09cf338925a22c14d901da776e528a9",
+      "bytes": 10164
+    },
+    {
+      "path": "src/AssistantReport.tsx",
+      "sha256": "22221b7a53a35050012cdfbd106e3d3b75021e319921f855b1dc8f8e580e2284",
+      "bytes": 14599
+    },
+    {
+      "path": "src/BlockerAudit.tsx",
+      "sha256": "aefcc3661a3dc6fa75925d4b8c2baabdf7c3c7457e7ffd38a499fcf448ce69e7",
+      "bytes": 2544
+    },
+    {
+      "path": "src/CaesarsEvidence.tsx",
+      "sha256": "741c8d336ac3a8ff01daf508b52dbb3a56825dae6a0c2c8669eb7bbc21c1bc3a",
+      "bytes": 7002
+    },
+    {
+      "path": "src/CaesarsFeed.tsx",
+      "sha256": "25fdc9d45c4097a958d30ef374e4abc7694333d04a28535a5dc02f74dba478fb",
+      "bytes": 2286
+    },
+    {
+      "path": "src/CorrectedReceivingLab.tsx",
+      "sha256": "b6568ac6e29f58819e5144672aacf667ba7aa2a64248568bb688f4c6c37cd928",
+      "bytes": 17285
+    },
+    {
+      "path": "src/DailyDashboard.tsx",
+      "sha256": "e40706734e710b773906b66af635dae0587b0191828e9bab39f2f53ce634646e",
+      "bytes": 15413
+    },
+    {
+      "path": "src/DataHealthPanel.tsx",
+      "sha256": "1e0b4ddf0560073259584e12e1f1b90bb9e05e63289d0a21598f03552d4c0590",
+      "bytes": 7319
+    },
+    {
+      "path": "src/EdgeScanner.tsx",
+      "sha256": "e30e72023a4eeb1e707a3077032e75c5ad43fe596c89356f9e3332fe6dbcc67e",
+      "bytes": 36143
+    },
+    {
+      "path": "src/GameMarketBoard.tsx",
+      "sha256": "75c8f73eba375b6cc46ff711ecdc995cd2fb23ff92437d00c7168c4d20274eae",
+      "bytes": 7675
+    },
+    {
+      "path": "src/HistoricalCalibration.tsx",
+      "sha256": "6b97e9d86e88144816ba4c39cb74fb65e9106d8d64a4d50ce84e4040bbe6a0ca",
+      "bytes": 3296
+    },
+    {
+      "path": "src/HistoricalNflOddsV4Panel.tsx",
+      "sha256": "3f59be304875fe4e218c63e28202589d5f4fb28f736234ac08ca5cd189fbba49",
+      "bytes": 5589
+    },
+    {
+      "path": "src/HistoricalPropPriceAudit.tsx",
+      "sha256": "cdb565e59fc5f987d3312e957a263857b1601d2fc319bcfbfa32d0193f01ecfd",
+      "bytes": 5049
+    },
+    {
+      "path": "src/IntegrationDiagnostics.tsx",
+      "sha256": "712e3f5a711c92280b841d443feb6b26e8270d9bc7b806a6a60ab996f709fcc3",
+      "bytes": 1704
+    },
+    {
+      "path": "src/KymGameLines.tsx",
+      "sha256": "1657ddff5e3f8208a5dcfdebddb496a494b18f9453b8c1c080c45545c1f15eeb",
+      "bytes": 23418
+    },
+    {
+      "path": "src/LineAwarePropLab.tsx",
+      "sha256": "83ccd2d7c80b51b8e38e537241c8a9c54fcba4f809d806494c553fe0fa5f888b",
+      "bytes": 6181
+    },
+    {
+      "path": "src/LiveResearchPage.tsx",
+      "sha256": "1f7f5fa1892838f93f5655c4f443171dfbc46265ebf2c7bbe2eb091c5497e8d2",
+      "bytes": 39165
+    },
+    {
+      "path": "src/NflPropLab.tsx",
+      "sha256": "ac89c74961b642e2d1fc2182c360a3787f8e63dd44678cfedaa8d34a35bf9691",
+      "bytes": 2367
+    },
+    {
+      "path": "src/NhlLeagueBacktest.tsx",
+      "sha256": "3c6125eae64c465f062597cff1b64b19b4154ff5b1940af9613f4bcf137f77e4",
+      "bytes": 5874
+    },
+    {
+      "path": "src/NhlOddsAudit.tsx",
+      "sha256": "49f063be745d119124b4d8e22c8d5a8945cb610bd548d3dfcc199c0ea28e5d5f",
+      "bytes": 8525
+    },
+    {
+      "path": "src/NhlShotsBacktest.tsx",
+      "sha256": "57beb3a28f40e797fdf430f1a0b863e7b8df2a5a8c3b36aad5745332f2f8ef57",
+      "bytes": 6583
+    },
+    {
+      "path": "src/ParlayAudit.tsx",
+      "sha256": "dde99e9022b4d7845873a72b88ea6eee3909e7b6d2d738e313facf59cffa8a22",
+      "bytes": 8591
+    },
+    {
+      "path": "src/PlayerBacktest.tsx",
+      "sha256": "660ac6544132c414334eee889f58ffe9e8e926e374fbd6721688594b792400bc",
+      "bytes": 4837
+    },
+    {
+      "path": "src/PropVerification.css",
+      "sha256": "2bf6ec1685050b8a544f41f926d20ff02df9a0091dfafbba8dc14e6c53f6c078",
+      "bytes": 823
+    },
+    {
+      "path": "src/PropVerification.tsx",
+      "sha256": "e920a365cda35e560eb93e946749b3e1da02ed25a5e7385cb3bd7b6cb5b51254",
+      "bytes": 3831
+    },
+    {
+      "path": "src/ReceiverMatchupLab.tsx",
+      "sha256": "19bbc0690721756f098b8b9d791d2babfdb9e7df90fb94ee89023b98f8a9473a",
+      "bytes": 13902
+    },
+    {
+      "path": "src/ReceivingForecast.tsx",
+      "sha256": "16d11d4789e4f2839698e85ace52ceaeb6818342244e94db00f056a5ab1021bd",
+      "bytes": 14938
+    },
+    {
+      "path": "src/ReceivingForwardEvaluation.tsx",
+      "sha256": "dd589d9c968dc75c9afdc59a2a723ecf4e45221b0e563df8cf3a0b73398b08e0",
+      "bytes": 7061
+    },
+    {
+      "path": "src/ReceivingForwardLog.tsx",
+      "sha256": "f1edf8b9337652ce2f66dd59e6fa231181452dca612e2705aa46ebe2c3e93342",
+      "bytes": 9674
+    },
+    {
+      "path": "src/ReceivingValidation.tsx",
+      "sha256": "6a9180959c1338fdad2dfdd1698295477651ea847ec93b4f78a8b22bc23aad94",
+      "bytes": 6126
+    },
+    {
+      "path": "src/ResearchLedger.tsx",
+      "sha256": "a9753c58e026e4e8a50959a64f9946f34a1cbd8fa49b1b5d29a1262e838080a4",
+      "bytes": 10332
+    },
+    {
+      "path": "src/ResearchPipeline.tsx",
+      "sha256": "eb192c838cc2915490fe9b20e9dfb22f08e12cd2c4723f6fbbc2a4f59584af38",
+      "bytes": 7785
+    },
+    {
+      "path": "src/ResearchSetup.tsx",
+      "sha256": "2610b603393235ec6cd11cb31478802695e0f8e75f224e9a7fa4b71b37748896",
+      "bytes": 26913
+    },
+    {
+      "path": "src/SportsGameOddsTracker.tsx",
+      "sha256": "33c4290de2e10e6dece2355b8113907cfa0aa6f4bbf1deda5737143c0fdd84b0",
+      "bytes": 22262
+    },
+    {
+      "path": "src/TnfUnderdogDeepDive.tsx",
+      "sha256": "e8b2c18b72f0a1f9eadf63256a1b6c26bd2e59f2f49b49b5f1f5e81ff602c96a",
+      "bytes": 5801
+    },
+    {
+      "path": "src/WagerTracker.tsx",
+      "sha256": "71fc48c07f62a0c8fd867c3bff48823862baeb17d198a9457d88c2d4a00cb4c3",
+      "bytes": 36607
+    },
+    {
+      "path": "src/index.css",
+      "sha256": "d775a83445aa1eada1970827b4f025d3ba5817fe095a8d22fc716146ccc7e8d9",
+      "bytes": 32730
+    },
+    {
+      "path": "src/main.tsx",
+      "sha256": "4a61bfe25f4b731c1ad59ca594045042eeddbfe3602e1f2cf9e4027f4faaa4ec",
+      "bytes": 230
+    },
+    {
+      "path": "backend/accountSlipAudit.ts",
+      "sha256": "08ac2ad29231fa141be37963eb7df2a514f2c80a07c3e7496083a26292b7b7c9",
+      "bytes": 6556
+    },
+    {
+      "path": "backend/allSportsReport.ts",
+      "sha256": "89a47511afce8ab2fc971bc7b4dd8f4d1d3700d1e3b122de303c95615266753f",
+      "bytes": 5457
+    },
+    {
+      "path": "backend/altOdds.ts",
+      "sha256": "ef8973ec941f19492b4ef1c463d81444ad0d1e57269198c99843c28cebd57018",
+      "bytes": 29345
+    },
+    {
+      "path": "backend/assistantReport.ts",
+      "sha256": "18432f52d154b7828e6061e643aff180c96af73e03da8ebd8653d9ce443f542f",
+      "bytes": 10898
+    },
+    {
+      "path": "backend/blockerAudit.ts",
+      "sha256": "39296aa41dad853f420c16e38b17983d62833e90cfce602f5f61c878d812904e",
+      "bytes": 5314
+    },
+    {
+      "path": "backend/caesarsFeed.ts",
+      "sha256": "d4061a7f99dbde00319a425e64707e944b2683a70b60e3f096c8d65b366091f9",
+      "bytes": 10246
+    },
+    {
+      "path": "backend/caesarsRules.ts",
+      "sha256": "ef8001aa65c2a29c78a7de39599d8e1f131cc30731fa5c449db5c1d31f4e507f",
+      "bytes": 2440
+    },
+    {
+      "path": "backend/context.ts",
+      "sha256": "0afdb5148c65d7653f89330167e87fe58ddd7747d88d6af3ab4db6d490c99d5c",
+      "bytes": 10901
+    },
+    {
+      "path": "backend/correctedReceiving.ts",
+      "sha256": "a5e5cd1fab54e92955d8904311081817cf39edf983c91210ccfc65fd26c55932",
+      "bytes": 9868
+    },
+    {
+      "path": "backend/correctedReceivingArtifact.json",
+      "sha256": "242855333203bfc4e06f561817f2ad955cc19b1520bb3cdf785decc9524a7237",
+      "bytes": 1915
+    },
+    {
+      "path": "backend/correctedReceivingManifest.json",
+      "sha256": "ccff246c6f304c71d86436b27409d5b7a3b4b2d6500b2179f9401a2ad466c7ff",
+      "bytes": 642
+    },
+    {
+      "path": "backend/correctedReceivingReport.json",
+      "sha256": "c8802905e0c29d2416d692b5b4d523540604e0b273cf2e8d30272f0a970a5b43",
+      "bytes": 3692
+    },
+    {
+      "path": "backend/coverage.ts",
+      "sha256": "56f6c397ce0331e207a2cac1c5dab8304df51ad34501c0b543910299ee6bd979",
+      "bytes": 7042
+    },
+    {
+      "path": "backend/edgePolicy.ts",
+      "sha256": "771ed0d48d3d40f9e39242f642b52632a4a1dce8f1bb6830ae895461894ba35d",
+      "bytes": 2703
+    },
+    {
+      "path": "backend/engine.ts",
+      "sha256": "503e073e88cca6031a9518fb36235b17e7624313b367aef5bf4d72cd57322d53",
+      "bytes": 39429
+    },
+    {
+      "path": "backend/executionEvidence.ts",
+      "sha256": "3c63517fb8609c05d0435902add6fcc13c56b0c3b58a87a1b201e0bd9f735a4c",
+      "bytes": 4647
+    },
+    {
+      "path": "backend/freeGameOdds.ts",
+      "sha256": "c6d38acda2d76953bbcfe70863789570faa6a0d76793c49cc067f0a02f4b8be7",
+      "bytes": 15506
+    },
+    {
+      "path": "backend/freeUnderdog.ts",
+      "sha256": "d54f0a7186cf766c5d1614c9e9710eafb941cba6db16037edf1bd1e11dd2e0ea",
+      "bytes": 26119
+    },
+    {
+      "path": "backend/gameLines.ts",
+      "sha256": "351bf1bc48df1056db1d606b89ceea717289de4bb3c15814c4f67cbb98696e1d",
+      "bytes": 30631
+    },
+    {
+      "path": "backend/halftimeOutlook.ts",
+      "sha256": "7bad47d0190c072f2708b9b897b629fd6d37941c6d377bb245abd939934d46c5",
+      "bytes": 4445
+    },
+    {
+      "path": "backend/halftime_model.json",
+      "sha256": "eeb7765f8f9d9e7285fd4cb0576c8962df296b3eb9aeede5ee312f5179275af6",
+      "bytes": 6368
+    },
+    {
+      "path": "backend/halftime_validation.json",
+      "sha256": "a76127ac2b0ae45c32dd023cbac537145498d4f8e3fada1631e40b71c0a3e689",
+      "bytes": 5681
+    },
+    {
+      "path": "backend/historicalNfl.ts",
+      "sha256": "05a9d6e77b81f1b2ada4f629e005edcf231af764825405879c29b856ff972bb7",
+      "bytes": 2828
+    },
+    {
+      "path": "backend/historicalNflOddsV4.ts",
+      "sha256": "f4a5140b89248a351cf48af9c4feac0f0e0ca53f8550598b49c37ac6cb3c4984",
+      "bytes": 8420
+    },
+    {
+      "path": "backend/historicalStatPolicy.ts",
+      "sha256": "96e0046ebc8425dd44276ed99ed7e49a820aa7b577217eb9a07d285b17a3f2a7",
+      "bytes": 1329
+    },
+    {
+      "path": "backend/independentReceptionArtifact.json",
+      "sha256": "2cef8576a3dd9ba5c53537844af82263d1e6bcfbef24565497ef3ee517ce91e4",
+      "bytes": 9130
+    },
+    {
+      "path": "backend/independentReceptionValidation.json",
+      "sha256": "c86e33977fd1950b2c0bfa2993bb86eadd3f9a5e5c2308794f25421bd934e9e4",
+      "bytes": 37762
+    },
+    {
+      "path": "backend/independentReceptions.ts",
+      "sha256": "97f84af96ce94778c552a4a63bcdc9eb82eef5d9afa9409f210617ae032c03db",
+      "bytes": 4961
+    },
+    {
+      "path": "backend/index.ts",
+      "sha256": "acdddd94b6662d8bfdd4fb4b2c2b37a04a8fd8d2c039d3b406b8f381a0ca243d",
+      "bytes": 31325
+    },
+    {
+      "path": "backend/integrationTests.ts",
+      "sha256": "d1d1544b887148d7af7be21ae43ca5e190a401f588a1676fc56b75dcff9a4284",
+      "bytes": 1262
+    },
+    {
+      "path": "backend/lineAwareNfl.ts",
+      "sha256": "e54b1cfe8b54e9c426a52f0c76f1ad391b616f6f055997e1416bcd93e3ee7af8",
+      "bytes": 9850
+    },
+    {
+      "path": "backend/liveGames.ts",
+      "sha256": "b3b9a7bbe5444b93d487faf22ca571d012f6aa8d8280b43f07d4caaf6c33df0a",
+      "bytes": 7506
+    },
+    {
+      "path": "backend/liveOdds.ts",
+      "sha256": "7220fbb58203c5e55dcb36215980e67ee807a5a8ad42ee2476aba85d8ea94a4e",
+      "bytes": 18895
+    },
+    {
+      "path": "backend/liveQuoteStorage.ts",
+      "sha256": "fbcda54b2832bacadac92ba05a4bb59c62999c76aa2f7669bc33eebbd5f5feb8",
+      "bytes": 2641
+    },
+    {
+      "path": "backend/liveResearch.ts",
+      "sha256": "866caa3e286c1da518d424497a98938daf4273b6c84dd161cc44eee793c46f2a",
+      "bytes": 5728
+    },
+    {
+      "path": "backend/liveSlip.ts",
+      "sha256": "f8d99c5633b9b16645d91442386333303672747ec1b0235e2233bdaad93a5108",
+      "bytes": 10011
+    },
+    {
+      "path": "backend/liveTypes.ts",
+      "sha256": "7adcb869c45bb13e0436c527118cfe037a05a83277e5d47f554a2a8ad1812be2",
+      "bytes": 3522
+    },
+    {
+      "path": "backend/mlbBaselineReport.json",
+      "sha256": "427d8a314ab9934c12b2c734406f5f4778b85bc337cc7894d344c7f1f5863bd8",
+      "bytes": 24934
+    },
+    {
+      "path": "backend/modelLab.ts",
+      "sha256": "fc0d493af8345247db32d7dce541b50106fda040ce275ac94d63fa73268b5a1d",
+      "bytes": 14766
+    },
+    {
+      "path": "backend/nflBaselineReport.json",
+      "sha256": "4188d1987bcc7e4a98c72876dc3d4939d727b0e7c35a16764264bf588a89ba01",
+      "bytes": 14679
+    },
+    {
+      "path": "backend/nflCalibration.ts",
+      "sha256": "ed4e20b2cea018db69e9175de772ea09e052934c0fe85f8f7f07c8fc5c52fa1a",
+      "bytes": 7148
+    },
+    {
+      "path": "backend/nflContext.ts",
+      "sha256": "a99447abae39a313d6c1db9caaf68e2695ed987ad7ffadbf30e13b4eea00d89f",
+      "bytes": 12588
+    },
+    {
+      "path": "backend/nflHistoricalQuoteAudit.ts",
+      "sha256": "7519db46190d5fb1c4d0b0554b6c0b62f3441126b4cb38b0b1acc273d4654336",
+      "bytes": 7579
+    },
+    {
+      "path": "backend/nflInjuryContext.ts",
+      "sha256": "b4aa357610712a6d5de24b00ca7a63bb9a15a911458dd2fda70430b32dd6e4e3",
+      "bytes": 3253
+    },
+    {
+      "path": "backend/nflPropBacktest.ts",
+      "sha256": "fea9fbf9afe84e22ca56e4681bd2e27d54d7e4ab6aba9fbdabaa40e2137bfa2c",
+      "bytes": 17226
+    },
+    {
+      "path": "backend/nflPropCalibration.ts",
+      "sha256": "3b4232b5daa544ab6ef8bc38b3206db0dd768c081982b69d8f739a0dc9f8b0cd",
+      "bytes": 4387
+    },
+    {
+      "path": "backend/nflPropReadiness.ts",
+      "sha256": "32d309efe11c3daa0a0d6f8f35669172039749e5c448620968d3e27793b4600d",
+      "bytes": 3830
+    },
+    {
+      "path": "backend/nhlHistoricalOdds.ts",
+      "sha256": "0a68e946f88dde1eb6369fe20c70f9b522eb2b32dadbdad121317d901bf3881d",
+      "bytes": 16272
+    },
+    {
+      "path": "backend/nhlLeagueBacktest.ts",
+      "sha256": "7567f863ed70bf22d807348405e56f6361eb0d8824a2238ba6202a732222fd26",
+      "bytes": 10199
+    },
+    {
+      "path": "backend/nhlShotsBacktest.ts",
+      "sha256": "560800dce68b7e991bd75b0a33943b6b8c0b20a3991f346a546cb4d324c64b54",
+      "bytes": 13124
+    },
+    {
+      "path": "backend/parlayAudit.ts",
+      "sha256": "3a3ca3bac6ea3e2992ea12e3617478649c46544611dc376e9074a2f5c29578cf",
+      "bytes": 7562
+    },
+    {
+      "path": "backend/predictionLedger.ts",
+      "sha256": "eeda1ebace7839da0ec86a9c04ab749b37f2a285ffcc6ed5b1f0ae4c4778cd29",
+      "bytes": 8068
+    },
+    {
+      "path": "backend/probabilityPrice.ts",
+      "sha256": "01bfb623d562a850552a1ac2054eeed0f34c16a4790086f6a5b81b72ceb24435",
+      "bytes": 6134
+    },
+    {
+      "path": "backend/propEventEvidence.ts",
+      "sha256": "e29c79eb202a7ae3b9d4cbd6bdba100851c657b2616fb7ea4260107a213b02ba",
+      "bytes": 7751
+    },
+    {
+      "path": "backend/propReferences.ts",
+      "sha256": "0d2b10f4cd2198f3836f45f8e8073afff927925784b25078db3274e122d3ad4b",
+      "bytes": 12736
+    },
+    {
+      "path": "backend/quoteArchive.ts",
+      "sha256": "7d543945cec8c8f9adf36887047e0cab822b7abc1163e928b14fe3b44d4bef65",
+      "bytes": 1951
+    },
+    {
+      "path": "backend/quoteSnapshotPayload.ts",
+      "sha256": "c13ef8decc282aac010848b23aec005d4632d84389339dc247dd6d3d622eaf35",
+      "bytes": 1627
+    },
+    {
+      "path": "backend/receiverMatchup.ts",
+      "sha256": "100d8adc72fffafe67d875c6799c8faf5f95746c715425c005619af4e0a72772",
+      "bytes": 8247
+    },
+    {
+      "path": "backend/receiving2026Validation.json",
+      "sha256": "2e313cd9862dfb9c299a59948fc805dd055966afb313c580922c1089ce6a5701",
+      "bytes": 8219
+    },
+    {
+      "path": "backend/receivingForecast.ts",
+      "sha256": "79116d6cf546744d8a1124b5cf00852f48b7729cc03877f3a6f91bf815da0f68",
+      "bytes": 17347
+    },
+    {
+      "path": "backend/receivingForward.ts",
+      "sha256": "9685abf93f0ed3c43bb2ec894c746cfdf0a730c27e5cd1687a850375ef35b198",
+      "bytes": 1690
+    },
+    {
+      "path": "backend/receivingForwardCore.ts",
+      "sha256": "4676e956978d887a8b7cbb0b6d28a9e1cb77d4f651bdd21a9e1b48ad7f24a2fb",
+      "bytes": 7582
+    },
+    {
+      "path": "backend/receivingForwardEvaluation.ts",
+      "sha256": "54095c2f613256ad59bb5df2630c8c8c2c055da207e49136be9ff160ab862c16",
+      "bytes": 4676
+    },
+    {
+      "path": "backend/receivingForwardEvaluationCore.ts",
+      "sha256": "c72d6ef91a38d973f2935b6c840492f494643f32cf7689b2040c88ef0aaaf45f",
+      "bytes": 11438
+    },
+    {
+      "path": "backend/receivingForwardOutcomes.ts",
+      "sha256": "04e8f5d89606be48c7fe22bfe2a4ed3a27a4fecd504cbd84224c08e298dd38ad",
+      "bytes": 14888
+    },
+    {
+      "path": "backend/receivingForwardProtocol.json",
+      "sha256": "97aac21f10a1bafd08921819a65dd2b3754ea24ad5b9ff3290eb6019a28b98e9",
+      "bytes": 2070
+    },
+    {
+      "path": "backend/receivingHistorySeed.json",
+      "sha256": "b74a834fc9b172b92aa7afde800b1f75087ea0da65bf626a2138e8ff14f49f86",
+      "bytes": 205650
+    },
+    {
+      "path": "backend/receivingValidation.ts",
+      "sha256": "250dd6a835d8696982964dced50c91a6031a8232842a03e176975285d578c30b",
+      "bytes": 891
+    },
+    {
+      "path": "backend/receptionFeatures.ts",
+      "sha256": "3a606a7df1657d23f82d7a9e3c2abb7a7392f40feba1104cca1faa19f2dc91b1",
+      "bytes": 9686
+    },
+    {
+      "path": "backend/researchControls.ts",
+      "sha256": "56c59d60289fcf21f52eed1b455d1b66ba05d77669253fbe97b9c94223e5382a",
+      "bytes": 14538
+    },
+    {
+      "path": "backend/researchPipeline.ts",
+      "sha256": "c85a171c3674605073f27fababb6346892befff5a26ecb7ec5e5f59e32e7b53b",
+      "bytes": 7863
+    },
+    {
+      "path": "backend/settlementSupport.ts",
+      "sha256": "64d754fae16d997fc2d9d20872dd1523ee4b03c540ec6e1fcb1b988cae8b8e5b",
+      "bytes": 7874
+    },
+    {
+      "path": "backend/sportsGameOdds.ts",
+      "sha256": "d76b4cb1505be46be859eec46c7136edc2c5fa78128643c3508812849d1c1f94",
+      "bytes": 1748
+    },
+    {
+      "path": "backend/sportsGameOddsCore.ts",
+      "sha256": "81f152ce1589b9dbc799d3e3d32fa14b6c41d7c5ad27c3ae531ada86d3eb066d",
+      "bytes": 14801
+    },
+    {
+      "path": "backend/sportsGameOddsStore.ts",
+      "sha256": "905b58637a777030e6207a853dd5bc4440a97266d0f41ed8a017f5dba055052f",
+      "bytes": 4988
+    },
+    {
+      "path": "backend/tnfUnderdogDeepDive.ts",
+      "sha256": "640cecb5880444a79115e219d5cffcbe8cffe18db2f9fa2bd1f690b1491075f6",
+      "bytes": 3916
+    },
+    {
+      "path": "backend/verifyProp.ts",
+      "sha256": "36ea346e156e3fa5034965b47ebc16964b0569b46927c52f68e90acf7540b138",
+      "bytes": 9533
+    },
+    {
+      "path": "backend/wagerLedger.ts",
+      "sha256": "ccb99e17d1feb6aea2b31644683b65cf15c1c99dc77338bef085a24ac002d9ae",
+      "bytes": 1129
+    },
+    {
+      "path": "shared/accountSlip.ts",
+      "sha256": "bf8fb232f7f8f03d4b437cc1aeeb1a087e836a4cf405ae70e5bf43d5d506d9ab",
+      "bytes": 9846
+    },
+    {
+      "path": "shared/dailyReport.ts",
+      "sha256": "89bb9ae6281de2a06cdfe7944d17bf8afb7d1ce242e7f2973b74273c837d1508",
+      "bytes": 5634
+    },
+    {
+      "path": "shared/dailyScanStatus.ts",
+      "sha256": "07d940dd04feb3cff3f047b7e174ca42ca6913603638035805a32101cf79e41d",
+      "bytes": 3571
+    },
+    {
+      "path": "shared/ledgerClientState.ts",
+      "sha256": "74632164c6f0d2ee8ca1193b61d0425786c588654f2e148a29e20f49beacd19e",
+      "bytes": 5160
+    },
+    {
+      "path": "shared/ledgerInput.ts",
+      "sha256": "9415ccffd38003f62d759068bcb227bf4e65c09da06f5fc8a48ce184ac5fd59d",
+      "bytes": 2770
+    },
+    {
+      "path": "shared/ledgerOwner.ts",
+      "sha256": "8f0075adb34e32f2b5a3416fb01b714050dc8ab01d03db30513b47d812c48e7c",
+      "bytes": 477
+    },
+    {
+      "path": "shared/propEvidence.ts",
+      "sha256": "21137f29dbf55e489489752e74f5dcf5a1a99998a9c2b9ac25046d07c0b6d053",
+      "bytes": 2571
+    },
+    {
+      "path": "shared/receivingBlockers.ts",
+      "sha256": "ca2b0719037e78a8f29753138c17bd2f9e23299f7d399827007dbc620409aa10",
+      "bytes": 8930
+    },
+    {
+      "path": "shared/receivingEvaluationReport.ts",
+      "sha256": "388a49f9d37186eacf50e63425a1671f0d9afc2faa2964d4ddd6cd0cb6223c7c",
+      "bytes": 6176
+    },
+    {
+      "path": "shared/sgoOwner.ts",
+      "sha256": "b7e18c9d07d209d3ac14472eb4ff6c9a0cb7056e16e8eb2d777b2ff5b9d6417e",
+      "bytes": 1441
+    }
+  ]
+}

@@ -88,3 +88,7 @@ current hosted export. Four related modules (independentReceptions,
 receptionFeatures, propEventEvidence, verifyProp) emit identical minified JavaScript
 with esbuild after TypeScript/format normalization. They were preserved, not retrained
 or promoted. Source equivalence is not live performance validation.
+
+## Full current source completion
+
+All128 current hosted source modules were subsequently recovered. Additional current changes have been integrated: SportsGameOdds tracker UI, stale-result/race handling in research panels, quote snapshot total-byte limits, strict research policy/ledger inputs, bounded forward evaluation and strict outcome CSV parsing, plus waiting-game status. Destination redirect and safe-integer repairs, existing research DB path, extra gateway and receiving60 routes remain preserved. Current host model JSON is unchanged. Full hashes: HOSTED_SOURCE_MANIFEST.json. Added regressions cover evaluation stalls, no future-game outcome requests, malformed quoted source data and aggregate archive limits.

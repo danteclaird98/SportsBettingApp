@@ -71,3 +71,7 @@ The connector rejects status `limit=0` (minimum 1); the corrected status reads u
 | `src/PropVerification.tsx` | `e920a365cda35e560eb93e946749b3e1da02ed25a5e7385cb3bd7b6cb5b51254` | DIFF |
 | `src/WagerTracker.tsx` | `71fc48c07f62a0c8fd867c3bff48823862baeb17d198a9457d88c2d4a00cb4c3` | DIFF |
 | `tests/tests.json` | `e8eaae4d1fa36aa5f797041082d4189ed73cba3f32fba95a6419fcc8ecdce168` | DIFF |
+
+## Completed source recovery
+
+Coordinator subsequently recovered every one of the128 src/backend/shared files at the same pinned valid release, with no read errors. The selected29-file boundary above describes the initial audit stage. Exact full file hashes are now in HOSTED_SOURCE_MANIFEST.json. This completes source recovery for those directories, not hosted workflow/provider/record verification. Both public URLs rendered during read-only browser checks; no scan, account sign-in, ledger access or provider request was triggered.

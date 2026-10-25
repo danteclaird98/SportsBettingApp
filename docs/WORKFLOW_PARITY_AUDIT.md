@@ -57,5 +57,4 @@ reference. Direct model/hash navigation, owner-bound ledger/SGO routes and missi
 SGO credentials behavior integrated. Local production build and three runtime
 checks pass; final CI browser scenarios must run against the exact release tree.
 No screenshot OCR was found or added, and no automatic cashout/execution or alert
-transport is claimed. Source recovery covers 29 selected complete files out of the
-current deployment's inventory; full application/vendor parity remains unestablished.
+transport is claimed. Source recovery now covers all128 src/backend/shared files from the current deployment; full application/vendor parity remains unestablished.
