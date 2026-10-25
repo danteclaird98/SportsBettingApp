@@ -98,7 +98,7 @@ export default function AssistantReport() {
   const [message, setMessage] = useState('');
   const generation = useRef(0);
   const query = new URLSearchParams({ sport, date, timezone: zone }).toString();
-  const url = `https://api-v2.appdeploy.ai/app/edgeboard-kshzox/api/assistant-report?${query}`;
+  const url = `/research-api/api/assistant-report?${query}`;
   async function generate() {
     const request = ++generation.current;
     setBusy(true);

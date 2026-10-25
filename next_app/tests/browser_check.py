@@ -130,6 +130,16 @@ with TemporaryDirectory() as tmp:
             page.locator('.research-estimate').filter(has_text='%').wait_for()
             page.screenshot(path=str(out/'receiving60-mobile.png'),full_page=True)
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Receiving60 mobile viewport overflow'
+            page.goto(f'http://127.0.0.1:{server.server_port}/advanced/')
+            page.get_by_role('button',name='Advanced Research',exact=True).click()
+            report_link=page.get_by_role('link',name='Open assistant JSON report',exact=True)
+            assert report_link.get_attribute('href').startswith('/research-api/api/assistant-report?')
+            page.get_by_role('button',name='Bookmakers & diagnostics',exact=True).click()
+            page.get_by_role('button',name='Check backend connection',exact=True).click()
+            page.get_by_text('Backend not connected. Configure the owned HTTPS service and its server-side read token.',exact=True).wait_for()
+            assert page.get_by_role('button',name='Load stored events',exact=True).is_disabled()
+            page.get_by_role('link',name='Return to EdgeBoard workspace',exact=True).click()
+            page.get_by_role('heading',name='A clearer view of the board.',exact=True).wait_for()
             assert not errors,errors
             print('PASS: desktop/mobile; demo filter; slip; price math; wager save/settle/persistence; five reports; seven sources; JSON download; receiving60 score/abstention/stale-result clearing/receipt persistence/reload/manual history/mobile; no JS errors')
             browser.close()

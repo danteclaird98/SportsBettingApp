@@ -46,3 +46,33 @@ test('stored odds routes retain authentication and explicit unavailable configur
   }
  } finally { rmSync(gatewayDir,{recursive:true,force:true}); }
 });
+
+test('real HTTP gateway dispatch preserves event parameters, authentication and filter boundaries',{timeout:10000},async()=>{
+ const {spawn}=await import('node:child_process');
+ const httpDir=mkdtempSync(join(tmpdir(),'edgeboard-gateway-http-'));
+ const child=spawn(process.execPath,['runtime.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.env,RESEARCH_DB:join(httpDir,'http.sqlite3'),RESEARCH_PORT:'0',ODDS_BACKEND_URL:'',ODDS_BACKEND_READ_TOKEN:''},stdio:['ignore','pipe','pipe']});
+ try{
+  const port=await new Promise((resolve,reject)=>{
+   const timer=setTimeout(()=>reject(Error('HTTP runtime did not start')),5000);
+   child.once('error',e=>{clearTimeout(timer);reject(e);});
+   let output='';child.stdout.on('data',chunk=>{output+=chunk;const match=output.match(/Research backend ready at (\d+)/);if(match){clearTimeout(timer);resolve(Number(match[1]));}});
+   child.once('exit',code=>{clearTimeout(timer);reject(Error('HTTP runtime exited before readiness: '+code));});
+  });
+  const base='http://127.0.0.1:'+port;
+  const status=await fetch(base+'/api/odds-backend/status');
+  assert.equal(status.status,200);assert.equal((await status.json()).state,'NOT_CONFIGURED');
+  assert.equal((await fetch(base+'/api/odds-backend/events/1')).status,401);
+  const headers={'X-Local-Research-User':'local-owner'};
+  for(const path of ['/api/odds-backend/events/1','/api/odds-backend/events/1/markets']){
+   const response=await fetch(base+path,{headers});
+   assert.equal(response.status,503,path);assert.equal((await response.json()).state,'NOT_CONFIGURED');
+  }
+  const invalid=await fetch(base+'/api/odds-backend/events/invalid',{headers});
+  assert.equal(invalid.status,400);assert.equal((await invalid.json()).error,'INVALID_EVENT_ID');
+  assert.equal((await fetch(base+'/api/odds-backend/latest?event_id=1&event_id=2',{headers})).status,400);
+  assert.equal((await fetch(base+'/api/odds-backend/events/1',{method:'POST',headers})).status,404);
+ }finally{
+  if(child.exitCode===null){const exited=new Promise(resolve=>child.once('exit',resolve));child.kill('SIGTERM');await exited;}
+  rmSync(httpDir,{recursive:true,force:true});
+ }
+});
