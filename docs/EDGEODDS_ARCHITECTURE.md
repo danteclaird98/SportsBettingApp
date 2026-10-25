@@ -127,6 +127,18 @@ Sports, events, odds, latest, history, connector health.
 ### E4 — EdgeBoard compatibility
 Adapter into existing Desk/EdgeBoard quote contract; no vendor payload leakage upstream.
 
+### E4a — Decisions API component (optional)
+A small default-off Decisions API adapter alongside E4 now has its own contract
+and offline tests; the live trial remains pending. The existing orchestrator,
+specialist agents, canonical quote pipeline,
+and deterministic eligibility checks retain their responsibilities. Begin with
+one advisory research check in shadow mode; activation is separate from the
+EdgeOdds compatibility release and must not block it.
+
+See [the independently testable integration tasks](integration/DECISIONS_API.md)
+for scope, acceptance checks, failure behavior and rollout gates. This roadmap
+entry does not establish live API access or activate a production component.
+
 ### E5 — Consensus
 Best price, market completeness, proportional no-vig benchmark, source diversity.
 

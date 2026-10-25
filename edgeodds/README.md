@@ -43,6 +43,13 @@ python -m unittest discover -s edgeodds/tests -v
 
 ## Next vertical slice
 
+The [architecture roadmap](../docs/EDGEODDS_ARCHITECTURE.md#roadmap) also tracks an
+optional [Decisions API component](../docs/integration/DECISIONS_API.md), scoped
+as an independently tested adapter within the existing agent architecture.
+The component is implemented and default-off; its live trial remains pending.
+Run its offline checks separately with
+`python -m unittest edgeodds.tests.test_decisions_integration -v`.
+
 1. Add deterministic team/event alias resolution with provenance.
 2. Add one authorized sportsbook-odds adapter.
 3. Archive the raw provider payload and its hash.
