@@ -33,6 +33,7 @@ jobs:
         run: |
           npm ci
           npm run test:model
+          npm run test:odds
           npm run build
           node --experimental-test-isolation=none --test compat/runtime.test.mjs
       - name: Install test browser

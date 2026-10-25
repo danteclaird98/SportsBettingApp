@@ -1,3 +1,4 @@
+import OddsBackend from './OddsBackend';
 import { useState } from 'react';
 import AccountSlipWorkspace from './AccountSlipWorkspace';
 import DailyDashboard from './DailyDashboard';
@@ -56,7 +57,7 @@ function App() {
   }
   return (
     <>
-      <div style={{padding:12,background:"#203022",color:"#d5efc2"}}>Local single-user research runtime · Provider credentials required where indicated · <a href="/">Return to EdgeBoard Next</a></div><header className="simpleNav">
+      <div style={{padding:12,background:"#203022",color:"#d5efc2"}}>EdgeBoard research tools · Provider credentials required where indicated · <a href="/">Return to EdgeBoard workspace</a></div><header className="simpleNav">
         <div className="simpleBrand">
           <strong>
             EdgeBoard <span>SportsAI888</span>
@@ -197,6 +198,7 @@ function App() {
             )}
             {advanced === 'integrations' && (
               <div className="advancedModules">
+                <OddsBackend />
                 <IntegrationDiagnostics />
                 <ResearchSetup />
                 <CaesarsEvidence />

@@ -1,6 +1,8 @@
-# EdgeBoard Next / MarketEdge OS
+# EdgeBoard / MarketEdge OS
 
-A new standalone sports research and manual wager tracking app, built from the decisions recovered across all seven accessible GitHub repositories. Existing applications and hosted deployments are untouched.
+EdgeBoard is one application in `danteclaird98/SportsBettingApp`. The workspace at `/` and the preserved research tools at `/advanced/` are views of the same privately authenticated app. The internal `next_app/` source folder is a development path, not a separate product. GitHub is the release source; Fly is the prepared hosting target. No new live deployment is claimed.
+
+The existing AppDeploy deployment remains intact until a tested cutover. Keep its private records and this workspace's ledgers separate unless a reviewed, owner-authorized import establishes their identity. Historical development branches and older research packages remain source references, not competing apps to launch.
 
 ## Hosting
 

@@ -1,4 +1,4 @@
-import { router, json, error, requireAuth, auth } from '@appdeploy/sdk';
+import { router, json, error, requireAuth, auth, secrets } from '@appdeploy/sdk';
 import { getConfig, scanEdges } from './engine';
 import { getNflResearchContext } from './context';
 import { getBankrollPolicy } from './edgePolicy';
@@ -81,7 +81,25 @@ import { checkAccountSlip } from './accountSlipAudit';
 import { verifyPublicProp } from './verifyProp';
 import { correctedReceivingReadiness, correctedReceivingReport, correctedReceivingScore, receiving60Prediction } from './correctedReceiving';
 
+import { makeOddsGateway, type Resource } from './oddsBackend';
+const oddsGateway = makeOddsGateway(async () => {
+  const names = await secrets.listSecretNames();
+  if (!names.includes('ODDS_BACKEND_URL') || !names.includes('ODDS_BACKEND_READ_TOKEN')) return null;
+  return { baseUrl: await secrets.readSecret('ODDS_BACKEND_URL'), token: await secrets.readSecret('ODDS_BACKEND_READ_TOKEN') };
+});
+const oddsRead = (resource: Resource) => async (ctx: { query: Record<string, string>; params: Record<string, string> }) => {
+  const result = await oddsGateway(resource, ctx.query, ctx.params.id);
+  return json(result.body, result.statusCode);
+};
+
 export const handler = router({
+  'GET /api/odds-backend/status': [oddsRead('status')],
+  'GET /api/odds-backend/events': [requireAuth(), oddsRead('events')],
+  'GET /api/odds-backend/events/:id': [requireAuth(), oddsRead('event')],
+  'GET /api/odds-backend/events/:id/markets': [requireAuth(), oddsRead('markets')],
+  'GET /api/odds-backend/latest': [requireAuth(), oddsRead('latest')],
+  'GET /api/odds-backend/history': [requireAuth(), oddsRead('history')],
+  'GET /api/odds-backend/bookmakers': [requireAuth(), oddsRead('bookmakers')],
   'POST /api/receiving60/predict': [async ({body}) => {
     const result=await receiving60Prediction(body);
     return json(result,result.reason==='ARTIFACT_INTEGRITY_FAILURE'?503:result.estimateAvailable?200:422);

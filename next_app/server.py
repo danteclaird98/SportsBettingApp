@@ -1,4 +1,4 @@
-"""EdgeBoard Next: single-user loopback research workspace, Python standard library."""
+"""EdgeBoard: single-user loopback research workspace, Python standard library."""
 from __future__ import annotations
 import argparse
 import base64
@@ -468,7 +468,7 @@ def main():
         if child is not None: Thread(target=monitor,daemon=True).start()
         def terminate(signum,frame): raise KeyboardInterrupt
         signal.signal(signal.SIGTERM,terminate)
-        print(f'EdgeBoard Next: http://{args.host}:{args.port}',flush=True)
+        print(f'EdgeBoard: http://{args.host}:{args.port}',flush=True)
         try: server.serve_forever()
         except KeyboardInterrupt: pass
         finally: stopped.set(); server.server_close()

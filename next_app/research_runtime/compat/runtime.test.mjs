@@ -22,3 +22,27 @@ test('SQLite compatibility: CRUD, ownership scopes and atomic rollback',async()=
  assert.equal((await db.get('owner-a',[id]))[0],null);
  rmSync(dir,{recursive:true,force:true});
 });
+
+test('stored odds routes retain authentication and explicit unavailable configuration',async()=>{
+ const gatewayDir=mkdtempSync(join(tmpdir(),'edgeboard-gateway-runtime-'));
+ process.env.RESEARCH_DB=join(gatewayDir,'gateway.sqlite3');
+ delete process.env.ODDS_BACKEND_URL;
+ delete process.env.ODDS_BACKEND_READ_TOKEN;
+ try {
+  const {handler}=await import('../build/backend.mjs');
+  const routes=handler.routes;
+  const result=await routes['GET /api/odds-backend/status'][0]({query:{},params:{}});
+  assert.equal(result.status,200);
+  assert.equal(result.data.state,'NOT_CONFIGURED');
+  assert.equal(result.data.executionEnabled,false);
+  for(const path of ['events','events/:id','events/:id/markets','latest','history','bookmakers']){
+   const chain=routes['GET /api/odds-backend/'+path];
+   assert.equal(chain.length,2);
+   assert.equal((await chain[0]({user:null})).status,401);
+   assert.equal(await chain[0]({user:{userId:'local-owner'}}),undefined);
+   const response=await chain[1]({query:['latest','history'].includes(path)?{event_id:'1'}:{},params:{id:'1'}});
+   assert.equal(response.status,503);
+   assert.equal(response.data.state,'NOT_CONFIGURED');
+  }
+ } finally { rmSync(gatewayDir,{recursive:true,force:true}); }
+});

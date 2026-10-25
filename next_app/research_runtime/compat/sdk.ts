@@ -17,7 +17,7 @@ export const db={
  tx:{update:(table:string,items:any[])=>({table,items})},
  async transact(ops:any[]){sql.exec('BEGIN IMMEDIATE');try{const result=ops.map(op=>update(op.table,op.items));sql.exec('COMMIT');return result;}catch(e){sql.exec('ROLLBACK');throw e;}}
 };
-const allowed=['PARLAY_API_KEY','SHARPAPI_KEY','THE_ODDS_API_KEY','CLEARSPORTS_API_KEY','PUCKAPI_API_KEY'];
+const allowed=['PARLAY_API_KEY','SHARPAPI_KEY','THE_ODDS_API_KEY','CLEARSPORTS_API_KEY','PUCKAPI_API_KEY','ODDS_BACKEND_URL','ODDS_BACKEND_READ_TOKEN'];
 export const secrets={async listSecretNames(){return allowed.filter(k=>!!process.env[k]);},async readSecret(name:string){if(!allowed.includes(name)||!process.env[name])throw Error('Provider credential is not configured');return process.env[name]!;}};
 export const json=(data:any,status=200)=>({status,data});
 export const error=(message:string,status=400)=>({status,data:{error:message,message}});
