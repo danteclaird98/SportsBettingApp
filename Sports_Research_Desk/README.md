@@ -19,10 +19,10 @@ Open http://127.0.0.1:8765 and enter the generated token. It is held only in pag
 
 - Discovery/Pregame: import an exact timestamped quote using the editable JSON template; browse and filter research facts, snapshots, exclusions and expiration. Price imports never create a probability model. Manual evidence remains unverified. `authorized_import` labels claimed import provenance, not independent verification of source truth.
 - Live: choose Live state in Record type to record source/retrieval timestamps, score, clock, period and feed mode; import matching live quotes separately. Out-of-order state updates are rejected. Disconnects, missing state, stale state and state/price misalignment suppress eligibility. No upstream feed is actually running.
-- Wagers: choose Wager, fill required fields and use proposed, paper or actual. This records user-entered information; actual means the user says the wager was placed. It is not confirmation from a bookmaker. Combination entries require leg records. External IDs deduplicate within a sportsbook/user.
+- Wagers: choose Wager and fill the standard Entry fields; Advanced JSON remains available for imports. Use proposed, paper or actual. This records user-entered information; actual means the user says the wager was placed. It is not confirmation from a bookmaker. Combination entries require leg records. External IDs deduplicate within a sportsbook/user. Re-importing an unchanged wager after settlement is ignored without resetting the settlement.
 - Settlements: choose Settlement and reference the saved wager ID. Payout **includes returned stake**. Profit = payout − stake − fees. Mark provisional until confirmed. Repeating the identical revision does nothing; corrections require a higher revision and retain audit history. Pushes/voids must return stake. Partial, cashout and dead-heat payouts are recorded explicitly, not inferred from unverified rules. Individual leg status remains as imported; no automatic leg grading.
 - Performance: confirmed settled stake, profit, ROI, sample counts, record and drawdown; breakdowns by sport, league, market, sportsbook and UTC placement date. Separate currencies/modes. Provisional entries remain open exposure. Deposits, withdrawals and bonuses are not wager profit and have no cash-account ledger here.
-- Limits: configurable maximum open stake, per-group stake and daily stake, by currency. Applies to new actual tracking entries. Daily boundaries use UTC, disclosed in the UI. Exposure groups are user-specified; no inferred correlation engine. This is a tracking constraint, not a sportsbook spending enforcement mechanism.
+- Limits: configurable maximum open stake, per-group stake and daily stake, by currency. Applies to new actual tracking entries. Provisional settlements still consume open/group capacity. Currency keys normalize to uppercase. Daily boundaries use UTC, disclosed in the UI. Exposure groups are user-specified; no inferred correlation engine. This is a tracking constraint, not a sportsbook spending enforcement mechanism.
 - Coverage/health/audit: visible unavailable feeds/models, designed market list, and persistent record/revision history.
 
 ## Calculation and evidence boundaries
@@ -43,7 +43,7 @@ CLV helper: placed decimal / exact-wager closing decimal − 1, same bookmaker a
 
 | Capability | Implemented locally | Live verified / dependencies |
 |---|---|---|
-| 12 market families including props, segments, futures and combinations | Generic import, display and tracking schema | No sport-specific verified adapter or model |
+| 13 market families including props, segments, futures and combinations | Generic import, display and tracking schema | No sport-specific verified adapter or model |
 | Deterministic EV and settlements | Core tested; ledger explicit returned payout | Book-specific automatic grading unavailable |
 | Discovery / pregame | Manual evidence board and exclusions | Provider discovery/scanning, odds, injuries, lineups, statistics missing |
 | Live | Manual state ingestion and stale/order checks | Polling/streaming, recovery, scheduler and alerts missing |
@@ -58,6 +58,13 @@ CLV helper: placed decimal / exact-wager closing decimal − 1, same bookmaker a
 python3 -m unittest discover -s tests -v
 python3 -m py_compile core.py engine.py server.py evaluation.py
 node --check web/ui.js  # optional syntax check if Node is installed
+node tests/ui_logic.cjs  # minimal DOM entry-logic check, not browser rendering
 ```
 
 See VERIFICATION.md for the exact run scope and limitations. No live provider data or real wagers were used. UI templates are placeholders, not current facts. The delivered database begins empty.
+
+## Continuation hardening
+
+Newer provider snapshots supersede earlier prices for the same exact wager/scope. A later suspension cannot revive an older open quote. Conflicting prices/status at the identical provider observation time fail closed. Pregame/live prices are never compared, and live prices without aligned valid state are excluded from best-price comparisons. Historical quotes remain retained and visibly marked superseded.
+
+Input validation rejects boolean numbers, nonboolean verification flags, invalid text identifiers, negative latency, zero-after-rounding stakes, and malformed currency keys. SQLite connections close after each operation. Settlement drawdown ordering uses parsed UTC instants rather than lexicographic timestamp strings. The field editor preserves paper defaults and provisional flags; sign-out clears entry data, and obsolete asynchronous page responses are ignored. Browser/device rendering remains unverified.
