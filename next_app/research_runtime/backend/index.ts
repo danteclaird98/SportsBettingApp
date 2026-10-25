@@ -92,7 +92,43 @@ const oddsRead = (resource: Resource) => async (ctx: { query: Record<string, str
   return json(result.body, result.statusCode);
 };
 
+import { receivingForecastOptions, receivingForecast } from './receivingForecast';
+import { receivingValidationReport } from './receivingValidation';
+import { saveReceivingForward, receivingForwardHistory } from './receivingForward';
+import { receivingForwardEvaluation } from './receivingForwardEvaluation';
+import { receivingForwardProtocol } from './receivingForwardCore';
+
 export const handler = router({
+  'POST /api/receiving-forward-evaluation': [requireAuth(), async ctx => {
+    if (!ctx.query.owner || ctx.query.owner !== ctx.user!.userId) return error('Account changed. Reload the forecast evaluation.', 403);
+    try { return json(await receivingForwardEvaluation(ctx.user!.userId, ctx.body)); }
+    catch (failure) {
+      if (failure instanceof Error && ['INVALID_EVALUATION_REQUEST', 'INVALID_HISTORY_TOKEN'].includes(failure.message))
+        return error('Evaluation request invalid. Reload saved history and retry.', 400);
+      return error('Evaluation unavailable. Retry under the current account; no saved forecast was changed.', 502);
+    }
+  }],
+  'GET /api/receiving-forward-protocol': [async () => json(await receivingForwardProtocol())],
+  'POST /api/receiving-forward': [requireAuth(), async ctx => {
+    if (!ctx.query.owner || ctx.query.owner !== ctx.user!.userId) return error('Account changed. Reload the forecast log.', 403);
+    try { return json(await saveReceivingForward(ctx.user!.userId, ctx.body)); }
+    catch { return error('Forecast save could not be confirmed. Reload the saved log; retry the same selection only. No probability was overwritten.', 400); }
+  }],
+  'GET /api/receiving-forward': [requireAuth(), async ctx => {
+    if (!ctx.query.owner || ctx.query.owner !== ctx.user!.userId) return error('Account changed. Reload the forecast log.', 403);
+    try { return json(await receivingForwardHistory(ctx.user!.userId, ctx.query.nextToken)); }
+    catch { return error('Saved forecast log unavailable. Retry reload; absence is not confirmed.', 502); }
+  }],
+  'GET /api/receiving-forecast-options': [
+    async ({ query }) => json(await receivingForecastOptions(query.query)),
+  ],
+  'POST /api/receiving-forecast': [
+    async ({ body }) => json(await receivingForecast(body)),
+  ],
+  'GET /api/receiving-validation': [
+    async () => json(await receivingValidationReport()),
+  ],
+
   'GET /api/odds-backend/status': [oddsRead('status')],
   'GET /api/odds-backend/events': [requireAuth(), oddsRead('events')],
   'GET /api/odds-backend/events/:id': [requireAuth(), oddsRead('event')],
