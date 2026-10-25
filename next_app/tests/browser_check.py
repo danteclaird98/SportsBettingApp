@@ -134,6 +134,12 @@ with TemporaryDirectory() as tmp:
             page.get_by_role('button',name='Advanced Research',exact=True).click()
             report_link=page.get_by_role('link',name='Open assistant JSON report',exact=True)
             assert report_link.get_attribute('href').startswith('/research-api/api/assistant-report?')
+            page.get_by_role('button',name='Models & history',exact=True).click()
+            page.get_by_role('heading',name='Receiving yards forecast',exact=True).wait_for()
+            page.get_by_role('button',name='Load source-backed players & games',exact=True).wait_for()
+            page.get_by_role('button',name='Inspect 2026 validation',exact=True).click()
+            page.get_by_role('table',name='Frozen 2026 retrospective comparison — lower losses are better').wait_for()
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Master forecast mobile viewport overflow'
             page.get_by_role('button',name='Bookmakers & diagnostics',exact=True).click()
             page.get_by_role('button',name='Check backend connection',exact=True).click()
             page.get_by_text('Backend not connected. Configure the owned HTTPS service and its server-side read token.',exact=True).wait_for()
