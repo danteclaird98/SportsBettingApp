@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 tini
 COPY --from=research-build /usr/local/bin/node /usr/local/bin/node
 WORKDIR /app
 COPY edgeodds/ ./edgeodds/
+COPY integrations/ ./integrations/
 COPY next_app/server.py next_app/sources.json ./next_app/
+COPY next_app/provider_imports.py ./next_app/provider_imports.py
 COPY next_app/backup.py ./next_app/backup.py
 COPY next_app/web/ ./next_app/web/
 COPY next_app/reports/ ./next_app/reports/

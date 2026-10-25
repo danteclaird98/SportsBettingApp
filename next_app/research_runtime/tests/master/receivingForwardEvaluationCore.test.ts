@@ -126,3 +126,14 @@ test('explicit final-game windows are preserved without pooling and invalid meta
   const emptyWindow=await run([],[],{source:{...source,status:'NOT_REQUESTED',files:[],finalGameWindow:exhausted}});
   assert.deepEqual(emptyWindow.source.finalGameWindow,exhausted);
 });
+
+
+test('unsafe integer outcomes stay unresolved and never enter proper scores',async()=>{
+  const a=await saved();
+  for(const yards of [Number.MAX_SAFE_INTEGER+1,-Number.MAX_SAFE_INTEGER-1]){
+    const result=await run([a],[final('player','game',yards)]);
+    assert.equal(result.scoredCount,0);
+    assert.equal(result.rows[0].reason,'RECEIVING_YARDS_INVALID');
+    assert.equal(result.scores.selected,null);
+  }
+});

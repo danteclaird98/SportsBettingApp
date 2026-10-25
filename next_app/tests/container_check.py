@@ -89,6 +89,14 @@ saved=call('/api/receiving60/receipts/'+str(records[0]['id']))
 assert saved['request']['history'][0]['receivingYards']==-5
 assert saved['scoreReceipt']['status']=='HOLD'
 assert saved['inputModeProvenance']=='CLIENT_DECLARED'
+import_payload={'request_id':'container-import-001','format':'normalized','payload':[{'provider':'synthetic','event_id':'synthetic:1','event':'Away @ Home','league':'NFL','bookmaker':'example','selection':'Home','period':'full_game','rules':'unknown','market':'moneyline','decimal_price':2.0,'starts_at':'2026-11-01T20:00:00Z','source_market_id':'native-moneyline','status':'open'}]}
+first_import=call('/api/provider-imports',json.dumps(import_payload).encode())
+assert first_import==call('/api/provider-imports',json.dumps(import_payload).encode())
+imports=call('/api/provider-imports')
+assert imports['observation_count']==1
+assert imports['verification']=='UNVERIFIED' and imports['execution_enabled'] is False
+assert imports['observations'][0]['updated_at'] is None
+assert call('/api/board?mode=network')['events']==[]
 state=call('/api/bootstrap')['state']
 if not state['wagers']:
     call('/api/wagers',json.dumps({'mode':'paper','book':'smoke',
@@ -108,6 +116,8 @@ restore_backup(snapshot,'/var/data/restored-smoke')
 restored=Workspace('/var/data/restored-smoke/workspace.sqlite3')
 assert len(restored.receiving60_records()['receipts'])==1
 assert len(restored.state()['wagers'])==1
+from next_app.provider_imports import ProviderImports
+assert ProviderImports(Path('/var/data/restored-smoke/workspace.sqlite3')).summary()['observation_count']==1
 print('PASS: online backup, checksum verification and isolated receipt restore')
 '''
 
@@ -134,7 +144,13 @@ def main():
     if args.fly and args.railway: parser.error('Choose one simulated host')
     env=dict(os.environ,WORKSPACE_USER='owner',WORKSPACE_PASSWORD=secrets.token_urlsafe(32),WORKSPACE_API_KEY=secrets.token_urlsafe(32))
     for key in ('DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'): env.pop(key,None)
-    prefix=['docker','--host=unix:///var/run/docker.sock']
+    # Use the active local Unix socket on Linux and Docker Desktop; never run
+    # acceptance against a remote daemon or inherited DOCKER_HOST.
+    endpoint=subprocess.run(['docker','context','inspect','--format','{{.Endpoints.docker.Host}}'],env=env,capture_output=True,text=True,timeout=10)
+    host=endpoint.stdout.strip()
+    if endpoint.returncode or not host.startswith('unix://'):
+        raise RuntimeError('Acceptance requires an active local Docker Unix socket')
+    prefix=['docker','--host='+host]
     name='edgeboard-check-'+secrets.token_hex(4); volume=name+'-data'
     def docker(*arguments,script=None,expected=0):
         result=subprocess.run(prefix+list(arguments),env=env,input=script,capture_output=True,text=True,timeout=60)

@@ -88,6 +88,7 @@ test('missing rows are not created; duplicate and invalid observations are prese
   assert.equal((await loader(data,{stats:duplicated}).load(data.receipts)).outcomes.length,2);
   assert.equal((await loader(data,{stats:data.stats.replace(',60',',')}).load(data.receipts)).outcomes[0].receivingYards,null);
   assert.equal((await loader(data,{stats:data.stats.replace(',60',',-5')}).load(data.receipts)).outcomes[0].receivingYards,-5);
+  assert.equal((await loader(data,{stats:data.stats.replace(',60',',9007199254740993')}).load(data.receipts)).outcomes[0].receivingYards,null);
   assert.equal((await loader(data,{stats:data.stats.replace(',WR,',',QB,')}).load(data.receipts)).outcomes[0].position,'QB');
   assert.equal((await loader(data,{stats:data.stats.replace(',LA,60',',SF,60')}).load(data.receipts)).outcomes[0].unresolvedReason,'PLAYER_TEAM_SCHEDULE_MISMATCH');
 });

@@ -1,0 +1,1 @@
+Adapters and movements adapted from danteclaird98/sports-betting-master commit 95d5e37a85a3faa2d7942a9c90b631a0c0471309. Network SDK entry point removed. UTC normalization added. Imported observations remain unverified.

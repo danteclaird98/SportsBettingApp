@@ -130,6 +130,18 @@ with TemporaryDirectory() as tmp:
             page.locator('.research-estimate').filter(has_text='%').wait_for()
             page.screenshot(path=str(out/'receiving60-mobile.png'),full_page=True)
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Receiving60 mobile viewport overflow'
+            page.get_by_role('button',name='Data & integrations',exact=False).click()
+            page.get_by_label('Response format',exact=True).select_option('normalized')
+            imported=[{'provider':'synthetic','event_id':'synthetic:1','event':'Away @ Home','league':'NFL','bookmaker':'example','selection':'Home','period':'full_game','rules':'unknown','market':'moneyline','decimal_price':2.0,'starts_at':'2026-11-01T20:00:00Z','source_market_id':'native','status':'open'}]
+            page.get_by_label('Provider response JSON',exact=True).fill(json.dumps(imported))
+            page.get_by_role('button',name='Save unverified observations',exact=True).click()
+            page.get_by_text('Import saved · unverified research only',exact=False).wait_for()
+            page.get_by_role('button',name='Save unverified observations',exact=True).click()
+            page.get_by_text('Import saved · unverified research only',exact=False).wait_for()
+            page.get_by_role('button',name='Reload saved imports',exact=True).click()
+            page.get_by_text('Saved import evidence',exact=True).wait_for()
+            assert '"observation_count": 1' in page.locator('#content').inner_text()
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Import mobile viewport overflow'
             page.goto(f'http://127.0.0.1:{server.server_port}/advanced/')
             page.get_by_role('button',name='Advanced Research',exact=True).click()
             report_link=page.get_by_role('link',name='Open assistant JSON report',exact=True)

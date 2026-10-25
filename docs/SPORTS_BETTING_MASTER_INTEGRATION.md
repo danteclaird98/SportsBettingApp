@@ -31,10 +31,10 @@ slice remains pending; prior CI results do not validate this commit.
 
 ## Remaining integration
 
-Provider response imports, movement tracking and other changed Master modules
-have not been copied. They require a bridge to EdgeBoard's stronger native identity,
-source-clock and immutable observation contracts; importing a quote must not grant
-verification or create a wagering signal. Eight consolidated source snapshots remain
+Follow-up provider imports and movement tracking are now implemented as manual,
+unverified observations in the existing private workspace. They do not populate the
+verified board or create wagering signals. Other changed Master modules remain
+subject to comparison and integration; no wholesale capability claim is made. Eight consolidated source snapshots remain
 traceable in Master rather than duplicated wholesale. Existing private ledgers have
 not been read, copied or migrated. No vendor credentials or regulated permissions
 are implied. No deployment was performed and the current hosted app is untouched.
