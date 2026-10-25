@@ -26,6 +26,7 @@ from urllib.parse import urlsplit, parse_qs
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT.parent))
+from next_app.provider_imports import ProviderImports
 from edgeodds.ingestion import IngestionStore
 from edgeodds.integrations.edgeboard import edgeboard_contract
 
@@ -377,6 +378,8 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
                     return self.reply(404,{'error':'Build research runtime with npm run build first'})
                 return self.reply(200,target.read_bytes(),mimetypes.guess_type(str(target))[0] or 'application/octet-stream')
             try:
+                if parsed.path == '/api/provider-imports':
+                    return self.reply(200,ProviderImports(Path(workspace.path)).summary())
                 if parsed.path == '/api/system/readiness':
                     result=system_readiness(workspace)
                     return self.reply(200 if result['ready'] else 503,{**result,
@@ -401,7 +404,7 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
                 if parsed.path == '/api/health': return self.reply(200,store.health(credential_configured=bool(os.environ.get('SPORTRADAR_API_KEY'))))
                 if parsed.path == '/api/models': return self.reply(200,{'models':report_catalog(),'live_approved':False})
                 if parsed.path == '/api/export': return self.reply(200,{'exported_at':now(),**workspace.state(),'models':report_catalog(),'sources':json.loads((ROOT/'sources.json').read_text())})
-                files={'/':'index.html','/app.js':'app.js','/receiving60.js':'receiving60.js','/style.css':'style.css'}
+                files={'/':'index.html','/app.js':'app.js','/receiving60.js':'receiving60.js','/providerImports.js':'providerImports.js','/style.css':'style.css'}
                 if parsed.path in files:
                     name=files[parsed.path]; kind='text/html; charset=utf-8' if name.endswith('html') else 'text/javascript; charset=utf-8' if name.endswith('js') else 'text/css; charset=utf-8'
                     return self.reply(200,(ROOT/'web'/name).read_bytes(),kind)
@@ -423,6 +426,8 @@ def make_handler(workspace, store, token, credentials=None, api_key=None):
                 if not 0 < length <= 65536: raise ValueError('Request too large or empty')
                 data=json.loads(self.rfile.read(length))
                 if not isinstance(data,dict): raise ValueError('Expected an object')
+                if urlsplit(self.path).path == '/api/provider-imports':
+                    return self.reply(200,ProviderImports(Path(workspace.path)).import_payload(data))
                 self.reply(200,workspace.mutate(urlsplit(self.path).path,data))
             except sqlite3.IntegrityError: self.reply(409,{'error':'This sportsbook ticket ID is already recorded'})
             except (ValueError,TypeError,KeyError) as exc: self.reply(400,{'error':str(exc)})

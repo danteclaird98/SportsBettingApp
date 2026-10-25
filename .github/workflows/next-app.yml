@@ -2,9 +2,9 @@ name: EdgeBoard app checks
 on:
   push:
     branches: [main, codex/render-private-api]
-    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', 'railway.json', 'fly.toml', '.dockerignore', '.github/workflows/next-app.yml']
+    paths: ['next_app/**', 'edgeodds/**', 'integrations/**', 'render.yaml', 'railway.json', 'fly.toml', '.dockerignore', '.github/workflows/next-app.yml']
   pull_request:
-    paths: ['next_app/**', 'edgeodds/**', 'render.yaml', 'railway.json', 'fly.toml', '.dockerignore', '.github/workflows/next-app.yml']
+    paths: ['next_app/**', 'edgeodds/**', 'integrations/**', 'render.yaml', 'railway.json', 'fly.toml', '.dockerignore', '.github/workflows/next-app.yml']
 permissions:
   contents: read
 jobs:
@@ -27,6 +27,7 @@ jobs:
           python -m unittest discover -s edgeodds/tests -q
           python -m unittest discover -s next_app/research_runtime/research/receiving60 -v
           node --check next_app/web/app.js
+          node --check next_app/web/providerImports.js
           node --check next_app/web/receiving60.js
       - name: Build research runtime and check frozen models
         working-directory: next_app/research_runtime
