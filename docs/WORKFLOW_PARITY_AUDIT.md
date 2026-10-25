@@ -58,3 +58,8 @@ SGO credentials behavior integrated. Local production build and three runtime
 checks pass; final CI browser scenarios must run against the exact release tree.
 No screenshot OCR was found or added, and no automatic cashout/execution or alert
 transport is claimed. Source recovery now covers all128 src/backend/shared files from the current deployment; full application/vendor parity remains unestablished.
+
+
+## Subsequent ledger review repair
+
+The hosted export remains legacy, but the canonical local research backend now implements revision-bound writes and durable read-only receipt reconciliation, using the existing client protocol. Valid legacy records remain in place; ambiguous duplicate heads are not merged. Earlier notes about dormant protocol/concurrency describe the audited baseline. See CODE_REVIEW_REPAIRS_2026-10-25.md for API compatibility, evidence and deployment boundaries.

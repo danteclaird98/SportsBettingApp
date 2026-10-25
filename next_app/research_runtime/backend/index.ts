@@ -665,7 +665,7 @@ export const handler = router({
         return json(
           await saveWagerLedger(
             ctx.user!.userId,
-            (ctx.body as { wagers?: unknown })?.wagers,
+            ctx.body,
           ),
         );
       } catch (e) {

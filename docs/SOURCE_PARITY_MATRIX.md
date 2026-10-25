@@ -92,3 +92,8 @@ or promoted. Source equivalence is not live performance validation.
 ## Full current source completion
 
 All128 current hosted source modules were subsequently recovered. Additional current changes have been integrated: SportsGameOdds tracker UI, stale-result/race handling in research panels, quote snapshot total-byte limits, strict research policy/ledger inputs, bounded forward evaluation and strict outcome CSV parsing, plus waiting-game status. Destination redirect and safe-integer repairs, existing research DB path, extra gateway and receiving60 routes remain preserved. Current host model JSON is unchanged. Full hashes: HOSTED_SOURCE_MANIFEST.json. Added regressions cover evaluation stalls, no future-game outcome requests, malformed quoted source data and aggregate archive limits.
+
+
+## Subsequent ledger review repair
+
+The hosted export remains legacy, but the canonical local research backend now implements revision-bound writes and durable read-only receipt reconciliation, using the existing client protocol. Valid legacy records remain in place; ambiguous duplicate heads are not merged. Earlier notes about dormant protocol/concurrency describe the audited baseline. See CODE_REVIEW_REPAIRS_2026-10-25.md for API compatibility, evidence and deployment boundaries.

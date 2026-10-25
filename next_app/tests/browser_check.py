@@ -217,6 +217,39 @@ with TemporaryDirectory() as tmp:
             assert page.url.endswith('#wagers')
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Research ledger mobile overflow'
             page.unroute('**/research-api/api/wager-ledger',mock_ledger)
+            # Commit a real isolated save, lose the acknowledgement, then reload/reconcile.
+            page.reload()
+            page.get_by_text('Private ledger loaded. Changes save to your account.',exact=True).wait_for()
+            committed={'save':0,'reconcile':0}
+            def lose_acknowledgement(route):
+                if route.request.method=='POST':
+                    action=route.request.post_data_json['action']
+                    committed[action]+=1
+                    response=route.fetch()
+                    assert response.status==200
+                    if action=='save':
+                        assert response.json()['status']=='saved'
+                        return route.fulfill(status=503,json={'error':'Synthetic lost committed acknowledgement'})
+                    return route.fulfill(response=response)
+                return route.continue_()
+            page.route('**/research-api/api/wager-ledger',lose_acknowledgement)
+            page.get_by_role('button',name='Paper wager',exact=True).click()
+            page.get_by_label('Event',exact=True).fill('Synthetic committed acknowledgement')
+            page.get_by_label('Market',exact=True).fill('moneyline')
+            page.get_by_label('Selection',exact=True).fill('Synthetic Home')
+            page.get_by_role('button',name='Save manual paper wager',exact=True).click()
+            page.get_by_role('button',name='Reconcile pending save',exact=True).wait_for()
+            assert committed['save']==1
+            page.reload()
+            page.get_by_text('An earlier ledger save needs reconciliation. Your draft is retained; edits stay disabled.',exact=True).wait_for()
+            page.get_by_role('button',name='Reconcile pending save',exact=True).click()
+            page.get_by_text('Saved to your private account. Current ledger reloaded.',exact=True).wait_for()
+            assert committed=={'save':1,'reconcile':1}
+            assert page.get_by_label('Event',exact=True).input_value()==''
+            assert page.get_by_text('Synthetic committed acknowledgement',exact=True).count()==1
+            assert page.get_by_role('button',name='Reconcile pending save',exact=True).count()==0
+            page.unroute('**/research-api/api/wager-ledger',lose_acknowledgement)
+
             page.get_by_role('link',name='Return to EdgeBoard workspace',exact=True).click()
             page.get_by_role('heading',name='A clearer view of the board.',exact=True).wait_for()
             assert not errors,errors

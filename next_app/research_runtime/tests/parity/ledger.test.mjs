@@ -14,7 +14,7 @@ const client=await bundled('../../shared/ledgerClientState.ts');
 const wager=(id='fixture')=>({id,mode:'paper',status:'open',betType:'single',stake:10,decimalOdds:2,payout:0,fees:0,event:'Synthetic fixture',sportsbook:'QA',selection:'Home',currency:'USD',placedAt:'2026-10-25T20:00:00Z',settlementConfirmed:false,history:[{at:'2026-10-25T20:00:00Z',action:'created',detail:'synthetic'}]});
 function storage(){const map=new Map();return{get length(){return map.size;},key:i=>[...map.keys()][i]??null,getItem:key=>map.get(key)??null,setItem:(key,value)=>map.set(key,value),removeItem:key=>map.delete(key)}}
 test('ledger input rejects malformed confirmations, dates, financial types and audit history',()=>{
- for(const patch of [{settlementConfirmed:'yes'},{placedAt:'2026-02-30T00:00:00Z'},{stake:true},{payout:NaN},{settlementConfirmed:true},{history:[{at:'unknown',action:'created',detail:''}]}])assert.throws(()=>input.validateWagers([{...wager(),...patch}]));
+ for(const patch of [{mode:['actual']},{status:['open'],settlementConfirmed:true},{betType:['single']},{settlementConfirmed:'yes'},{placedAt:'2026-02-30T00:00:00Z'},{stake:true},{payout:NaN},{settlementConfirmed:true},{history:[{at:'unknown',action:'created',detail:''}]}])assert.throws(()=>input.validateWagers([{...wager(),...patch}]));
  assert.equal(input.validateWagers([wager()]).length,1);
  assert.throws(()=>input.validateWagers([wager(),wager()]));
 });
@@ -37,18 +37,20 @@ test('pending protocol state is immutable owner scoped and never silently overwr
  client.forgetPendingLedgerWrite(write,store);
  assert.equal(client.pendingLedgerWrites('owner',store).length,0);
 });
-test('actual SQLite legacy backend strengthens validation without pretending revision protocol exists',async()=>{
+test('actual SQLite ledger uses revision-bound receipts and rejects invalid input',async()=>{
  const dir=mkdtempSync(join(tmpdir(),'edgeboard-ledger-parity-'));
  process.env.RESEARCH_DB=join(dir,'research.sqlite3');
  try{
   const ledger=await bundled('../../backend/wagerLedger.ts',{alias:{'@appdeploy/sdk':new URL('../../compat/sdk.ts',import.meta.url).pathname}});
-  const saved=await ledger.saveWagerLedger('owner',[wager()]);
-  assert.equal(saved.count,1);
+  const envelope={action:'save',owner:'owner',requestId:'request-1',expectedRevision:0,wagers:[wager()]};
+  const saved=await ledger.saveWagerLedger('owner',envelope);
+  assert.equal(saved.receipt.count,1);
   const result=await ledger.getWagerLedger('owner');
   assert.equal(result.wagers[0].event,'Synthetic fixture');
-  assert.equal(result.protocol,undefined,'No revision protocol can be claimed from list/update storage');
+  assert.equal(result.protocol,'revision-receipt-v1');
+  assert.equal(result.revision,1);
   assert.deepEqual((await ledger.getWagerLedger('other')).wagers,[]);
-  await assert.rejects(ledger.saveWagerLedger('owner',[{...wager(),settlementConfirmed:'yes'}]));
+  await assert.rejects(ledger.saveWagerLedger('owner',{...envelope,requestId:'invalid',expectedRevision:1,wagers:[{...wager(),settlementConfirmed:'yes'}]}));
   assert.equal((await ledger.getWagerLedger('owner')).wagers.length,1);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });

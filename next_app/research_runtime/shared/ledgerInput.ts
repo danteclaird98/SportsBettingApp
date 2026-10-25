@@ -28,9 +28,10 @@ export function validateWagers(input: unknown): Record<string, unknown>[] {
     if (!item || typeof item !== 'object' || Array.isArray(item)) throw Error('Invalid wager');
     const w = item as Record<string, unknown>;
     if (!text(w.id) || ids.has(w.id) ||
-        !['actual', 'paper'].includes(String(w.mode)) ||
-        !['open', 'win', 'loss', 'push', 'void', 'cashout', 'partial'].includes(String(w.status)) ||
-        !['single', 'parlay'].includes(String(w.betType)) ||
+        typeof w.mode !== 'string' || typeof w.status !== 'string' || typeof w.betType !== 'string' ||
+        !['actual', 'paper'].includes(w.mode as string) ||
+        !['open', 'win', 'loss', 'push', 'void', 'cashout', 'partial'].includes(w.status as string) ||
+        !['single', 'parlay'].includes(w.betType as string) ||
         ledgerNumber(w.stake, 'stake') <= 0 || ledgerNumber(w.decimalOdds, 'odds') <= 1 ||
         ledgerNumber(w.payout, 'payout') < 0 || ledgerNumber(w.fees, 'fees') < 0 ||
         !text(w.event) || !text(w.sportsbook) || !text(w.selection) ||
