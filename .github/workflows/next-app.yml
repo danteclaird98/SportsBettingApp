@@ -35,6 +35,7 @@ jobs:
           npm ci
           npm run test:model
           npm run test:master
+          node --test tests/parity/*.test.*
           npm run test:odds
           npm run build
           node --experimental-test-isolation=none --test compat/runtime.test.mjs

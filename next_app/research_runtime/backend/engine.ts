@@ -899,14 +899,15 @@ export async function scanEdges(input: {
   commenceTimeTo?: string;
   offset?: number;
   limit?: number;
-}) {
+}, allowProviderRequests = false) {
+  // This capability is server-controlled. Never read it from request JSON.
   const sport = input.sport ?? 'baseball_mlb';
   if (sport === 'americanfootball_nfl' && input.scanType === 'kym') {
     return scanNflKymGameLines({
       mode: input.mode,
       from: input.commenceTimeFrom,
       to: input.commenceTimeTo,
-    });
+    }, allowProviderRequests);
   }
   if (input.mode === 'demo') {
     const demo = demoEdges().map((edge, index) => {
@@ -983,7 +984,8 @@ export async function scanEdges(input: {
     }
   }
 
-  const key = await readParlayKey();
+  // Public scans stay free even when provider secrets exist.
+  const key = allowProviderRequests ? await readParlayKey() : null;
   if (key) {
     try {
       return await scanParlay(

@@ -498,20 +498,25 @@ async function fetchOdds(key: string, from?: string, to?: string) {
   };
 }
 
-export async function scanNflKymGameLines(input: { mode?: string; from?: string; to?: string }) {
+export async function scanNflKymGameLines(
+  input: { mode?: string; from?: string; to?: string },
+  allowProviderRequests = false,
+) {
   if (input.mode === 'demo') return demoResponse();
-  const key = await readParlayKey();
+  const key = allowProviderRequests ? await readParlayKey() : null;
   const parlay = key
     ? await fetchOdds(key, input.from, input.to)
     : {
         events: [] as OddsEvent[],
         creditsRemaining: null,
         partialBoard: true,
-        providerName: 'ParlayAPI not configured',
-        providerNotice: 'ParlayAPI is not configured. EdgeBoard is using the alternate provider ladder instead.',
+        providerName: allowProviderRequests ? 'ParlayAPI not configured' : 'ParlayAPI opt-in required',
+        providerNotice: allowProviderRequests
+          ? 'ParlayAPI is not configured. EdgeBoard is using public alternatives.'
+          : 'Public scans do not use provider credits. Optional keyed feeds require a separate authorized request.',
         providerUnavailable: true,
       };
-  const alternate = await fetchAlternativeNflOdds(input.from, input.to);
+  const alternate = await fetchAlternativeNflOdds(input.from, input.to, allowProviderRequests);
   const events = mergeOddsEvents([parlay.events, alternate.events]);
   const parlayHealth: ProviderHealth = {
     id: 'parlay',
@@ -526,7 +531,7 @@ export async function scanNflKymGameLines(input: { mode?: string; from?: string;
             ? 'error'
             : 'active',
     detail: !key
-      ? 'Primary feed is not configured.'
+      ? allowProviderRequests ? 'Primary feed is not configured.' : 'Provider requests are disabled for public scans.'
       : parlay.providerNotice ?? 'Primary sportsbook feed active.',
     eventCount: parlay.events.length,
     bookCount: new Set(parlay.events.flatMap(event => event.bookmakers?.map(book => book.key ?? '') ?? []).filter(Boolean)).size,
@@ -601,7 +606,7 @@ export async function scanNflKymGameLines(input: { mode?: string; from?: string;
     }),
   }));
 
-  const context = await fetchNflGameContext(usableEvents);
+  const context = await fetchNflGameContext(usableEvents, allowProviderRequests);
   const providerHealth = [parlayHealth, ...alternate.providerHealth, ...context.providerHealth];
   const hasSportsbookGameLines = usableEvents.some(event => (event.bookmakers ?? []).some(book => (book.markets ?? []).some(market => market.key === 'spreads' || market.key === 'totals')));
   const consensusAvailable = sourceKeys.size >= 2;
@@ -626,7 +631,7 @@ export async function scanNflKymGameLines(input: { mode?: string; from?: string;
     maxQuoteAgeSeconds: MAX_GAME_LINE_AGE_SECONDS,
     generatedAt: new Date().toISOString(),
     eventCount: usableEvents.length,
-    creditsUsed: 4,
+    creditsUsed: key ? 4 : 0,
     creditsRemaining: remaining,
     partialBoard,
     underdogPropsLoaded: 0,

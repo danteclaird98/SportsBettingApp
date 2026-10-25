@@ -1,7 +1,5 @@
-import ReceivingForecast from './ReceivingForecast';
-import ReceivingValidation from './ReceivingValidation';
 import OddsBackend from './OddsBackend';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AccountSlipWorkspace from './AccountSlipWorkspace';
 import DailyDashboard from './DailyDashboard';
 import ReceiverMatchupLab from './ReceiverMatchupLab';
@@ -18,6 +16,8 @@ import NflPropLab from './NflPropLab';
 import BlockerAudit from './BlockerAudit';
 import PlayerBacktest from './PlayerBacktest';
 import CorrectedReceivingLab from './CorrectedReceivingLab';
+import ReceivingForecast from './ReceivingForecast';
+import ReceivingValidation from './ReceivingValidation';
 import LineAwarePropLab from './LineAwarePropLab';
 import HistoricalPropPriceAudit from './HistoricalPropPriceAudit';
 import HistoricalNflOddsV4Panel from './HistoricalNflOddsV4Panel';
@@ -28,12 +28,28 @@ import CaesarsEvidence from './CaesarsEvidence';
 import ParlayAudit from './ParlayAudit';
 import LiveResearchPage from './LiveResearchPage';
 
-type Workspace = 'today' | 'account' | 'live' | 'wagers' | 'advanced';
+type Workspace = 'today' | 'account' | 'live' | 'wagers' | 'model' | 'advanced';
 type AdvancedSection = 'markets' | 'models' | 'integrations';
+type WorkspaceRoute = { workspace: Workspace; advanced: AdvancedSection };
+
+function readRoute(): WorkspaceRoute {
+  const [workspace, section] = window.location.hash.slice(1).split('/');
+  if (workspace === 'models') return { workspace: 'advanced', advanced: 'models' };
+  const advanced = section === 'models' || section === 'integrations' ? section : 'markets';
+  if (workspace === 'account' || workspace === 'live' || workspace === 'wagers' || workspace === 'model' || workspace === 'advanced') {
+    return { workspace, advanced };
+  }
+  return { workspace: 'today', advanced: 'markets' };
+}
 
 function App() {
-  const [workspace, setWorkspace] = useState<Workspace>('today');
-  const [advanced, setAdvanced] = useState<AdvancedSection>('markets');
+  const [route, setRoute] = useState<WorkspaceRoute>(readRoute);
+  const { workspace, advanced } = route;
+  useEffect(() => {
+    const onHashChange = () => setRoute(readRoute());
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
   const [receiverPick, setReceiverPick] = useState<{
     player: string;
     event: string;
@@ -49,22 +65,23 @@ function App() {
     startTime: string;
   }) {
     setReceiverPick(pick);
-    setAdvanced('markets');
-    open('advanced');
+    open('advanced', 'markets');
   }
 
-  function open(workspaceToOpen: Workspace) {
-    setWorkspace(workspaceToOpen);
+  function open(workspaceToOpen: Workspace, section: AdvancedSection = advanced) {
+    setRoute({ workspace: workspaceToOpen, advanced: section });
+    window.location.hash = workspaceToOpen === 'advanced' ? `advanced/${section}` : workspaceToOpen;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   return (
     <>
-      <div style={{padding:12,background:"#203022",color:"#d5efc2"}}>EdgeBoard research tools · Provider credentials required where indicated · <a href="/">Return to EdgeBoard workspace</a></div><header className="simpleNav">
+      <header className="simpleNav">
+        <a href="/">Return to EdgeBoard workspace</a>
         <div className="simpleBrand">
           <strong>
-            EdgeBoard <span>SportsAI888</span>
+            EdgeBoard <span>Research</span>
           </strong>
-          <small>Verified research, disciplined betting</small>
+          <small>Evidence, model audits and disciplined research</small>
         </div>
         <nav aria-label="Main workspace" className="simpleNavButtons">
           <button
@@ -74,6 +91,14 @@ function App() {
             onClick={() => open('today')}
           >
             Today's Board
+          </button>
+          <button
+            type="button"
+            className={workspace === 'model' ? 'selected' : ''}
+            aria-current={workspace === 'model' ? 'page' : undefined}
+            onClick={() => open('model')}
+          >
+            Independent model
           </button>
           <button
             type="button"
@@ -110,15 +135,31 @@ function App() {
         </nav>
       </header>
       <main>
+        <aside className="releaseWorkspaceNotice" aria-label="Workspace setup">
+          Research tools share this EdgeBoard host. Provider connections require setup; the two tracking views retain separate records.
+        </aside>
         {workspace === 'today' && (
           <DailyDashboard
             onAdvanced={() => open('advanced')}
             onLive={() => open('live')}
+            onModel={() => open('model')}
             onResearchReceiver={openReceiver}
           />
         )}
         {workspace === 'account' && <AccountSlipWorkspace />}
         {workspace === 'live' && <LiveResearchPage />}
+        {workspace === 'model' && (
+          <div className="advancedShell independentModelWorkspace">
+            <div className="advancedIntro">
+              <span className="simpleEyebrow">INDEPENDENT OF MARKET ODDS</span>
+              <h1>Independent probability model</h1>
+              <p>Choose a real player and next fixture to calculate a conditional receiving forecast, inspect the frozen model and review separate 2026 evidence. Prospective validation and market checks remain required for betting approval.</p>
+            </div>
+            <ReceivingForecast />
+            <ReceivingValidation />
+            <CorrectedReceivingLab />
+          </div>
+        )}
         {workspace === 'wagers' && (
           <div className="advancedShell">
             <div className="advancedIntro">
@@ -151,21 +192,21 @@ function App() {
               <button
                 type="button"
                 className={advanced === 'markets' ? 'selected' : ''}
-                onClick={() => setAdvanced('markets')}
+                onClick={() => open('advanced', 'markets')}
               >
                 Markets & props
               </button>
               <button
                 type="button"
                 className={advanced === 'models' ? 'selected' : ''}
-                onClick={() => setAdvanced('models')}
+                onClick={() => open('advanced', 'models')}
               >
                 Models & history
               </button>
               <button
                 type="button"
                 className={advanced === 'integrations' ? 'selected' : ''}
-                onClick={() => setAdvanced('integrations')}
+                onClick={() => open('advanced', 'integrations')}
               >
                 Bookmakers & diagnostics
               </button>

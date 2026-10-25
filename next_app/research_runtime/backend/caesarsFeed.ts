@@ -286,8 +286,18 @@ async function requestFeed(sport: string): Promise<Feed> {
     partialBoard: props.partial || games.partial,
   };
 }
-export async function loadCaesarsFeed(sport = 'americanfootball_nfl') {
+export async function loadCaesarsFeed(sport = 'americanfootball_nfl', allowProviderRequests = false) {
   if (!SUPPORTED_SPORTS.has(sport)) throw Error('Unsupported sport');
+  if (!allowProviderRequests) {
+    // The public GET cannot authorize provider credits, even when a key exists.
+    const response = describeCaesars({
+      retrievedAt: new Date().toISOString(), quotes: [], rejectedRows: 0,
+      creditsRemaining: null, partialBoard: false,
+      sourceHealth: [{ family: 'all', status: 'OPT_IN_REQUIRED', rows: 0 }],
+    }, Date.now(), sport);
+    return { ...response, status: 'OPT_IN_REQUIRED', cacheHit: false,
+      note: 'No provider request made. This public endpoint does not authorize provider credits. Use the separate signed-in, budget-confirmed live price workflow for supported games.' };
+  }
   const cached = cache.get(sport);
   if (cached && Date.now() - Date.parse(cached.retrievedAt) < CACHE_MS)
     return { ...describeCaesars(cached, Date.now(), sport), cacheHit: true };

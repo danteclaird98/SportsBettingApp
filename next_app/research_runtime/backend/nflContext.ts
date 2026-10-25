@@ -171,8 +171,11 @@ async function weatherForEvent(event: NormalizedOddsEvent) {
   }
 }
 
-export async function fetchNflGameContext(events: NormalizedOddsEvent[]) {
-  const injuries = await fetchClearSportsInjuries(events);
+export async function fetchNflGameContext(events: NormalizedOddsEvent[], allowProviderRequests = false) {
+  const injuries = allowProviderRequests ? await fetchClearSportsInjuries(events) : {
+    health: { id: 'clearsports', name: 'ClearSports', status: 'unconfigured' as const, detail: 'Optional keyed context is disabled for public scans; no provider quota used.', eventCount: 0, bookCount: 0 },
+    byEvent: new Map<string, string[]>(),
+  };
   const weatherResults = await Promise.all(events.map(async event => ({ event: `${event.away_team ?? 'Away'} @ ${event.home_team ?? 'Home'}`, weather: await weatherForEvent(event) })));
   const weatherCount = weatherResults.filter(item => item.weather).length;
   const contexts: GameContext[] = weatherResults.map(item => ({ event: item.event, weather: item.weather, injuries: injuries.byEvent.get(item.event) ?? [] })).filter(item => item.weather || item.injuries.length);

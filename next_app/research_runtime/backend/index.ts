@@ -1,3 +1,6 @@
+import { ledgerRequestOwnerMatches } from '../shared/ledgerOwner';
+import { sgoRequestOwnerMatches } from '../shared/sgoOwner';
+import { sportsGameOddsStatus, refreshSportsGameOdds, sportsGameOddsHistory } from './sportsGameOdds';
 import { router, json, error, requireAuth, auth, secrets } from '@appdeploy/sdk';
 import { getConfig, scanEdges } from './engine';
 import { getNflResearchContext } from './context';
@@ -99,6 +102,21 @@ import { receivingForwardEvaluation } from './receivingForwardEvaluation';
 import { receivingForwardProtocol } from './receivingForwardCore';
 
 export const handler = router({
+  'GET /api/sgo/status': [async () => {
+    try { return json(await sportsGameOddsStatus()); }
+    catch { return error('SportsGameOdds configuration unavailable; no provider request made.', 502); }
+  }],
+  'POST /api/sgo/refresh': [requireAuth(), async ctx => {
+    if (!sgoRequestOwnerMatches(ctx.user!.userId, ctx.query.owner)) return error('Account changed. Reload the tracker before requesting prices.', 403);
+    try { return json({ ...(await refreshSportsGameOdds(ctx.body, ctx.user!.userId)), owner: ctx.user!.userId }); }
+    catch { return error('Request rejected or reservation unconfirmed. Review saved history and wait for the refresh cooldown before retrying. No automatic provider retry.', 400); }
+  }],
+  'GET /api/sgo/history': [requireAuth(), async ctx => {
+    if (!sgoRequestOwnerMatches(ctx.user!.userId, ctx.query.owner)) return error('Account changed. Reload saved history.', 403);
+    try { return json({ ...(await sportsGameOddsHistory(ctx.user!.userId, ctx.query.league, ctx.query.mode, ctx.query.nextToken)), owner: ctx.user!.userId }); }
+    catch { return error('SportsGameOdds saved history unavailable. No provider request made.', 502); }
+  }],
+
   'POST /api/receiving-forward-evaluation': [requireAuth(), async ctx => {
     if (!ctx.query.owner || ctx.query.owner !== ctx.user!.userId) return error('Account changed. Reload the forecast evaluation.', 403);
     try { return json(await receivingForwardEvaluation(ctx.user!.userId, ctx.body)); }
@@ -637,11 +655,12 @@ export const handler = router({
   ],
   'GET /api/wager-ledger': [
     requireAuth(),
-    async (ctx) => json(await getWagerLedger(ctx.user!.userId)),
+    async (ctx) => json({ ...(await getWagerLedger(ctx.user!.userId)), owner: ctx.user!.userId }),
   ],
   'POST /api/wager-ledger': [
     requireAuth(),
     async (ctx) => {
+      if (!ledgerRequestOwnerMatches(ctx.user!.userId, ctx.body)) return error('Account changed. Reload the private ledger before saving.',403);
       try {
         return json(
           await saveWagerLedger(
